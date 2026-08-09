@@ -1,0 +1,137 @@
+'use client';
+
+import { useEffect, useState, useRef } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useFamilyStore } from '@/store/familyStore';
+import { updateChild, uploadChildAvatar, generatePairingCode } from '@/lib/child-service';
+
+export default function ChildDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { family, children, setChildren } = useFamilyStore();
+  const child = children.find((c) => c.id === id);
+
+  const [name, setName] = useState(child?.name ?? '');
+  const [saving, setSaving] = useState(false);
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (child) setName(child.name);
+  }, [child]);
+
+  if (!child || !family) return null;
+
+  const handleSaveName = async () => {
+    if (!name.trim() || name === child.name) return;
+    setSaving(true);
+    try {
+      const updated = await updateChild(child.id, { name: name.trim() });
+      setChildren(children.map((c) => c.id === child.id ? updated : c));
+    } catch (err) { console.error(err); }
+    finally { setSaving(false); }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const updated = await uploadChildAvatar(child.id, file);
+      setChildren(children.map((c) => c.id === child.id ? updated : c));
+    } catch (err) {
+      console.error('Failed to upload avatar:', err);
+    }
+  };
+
+  const handleGenerateCode = async () => {
+    setGenerating(true);
+    try {
+      const code = await generatePairingCode(family.id, child.id);
+      setPairingCode(code);
+    } catch (err) { console.error(err); }
+    finally { setGenerating(false); }
+  };
+
+  return (
+    <div className="max-w-xl mx-auto py-8 space-y-6">
+      <Link href="/settings" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
+        ← Back to Settings
+      </Link>
+
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden">
+        {/* Profile Header */}
+        <div className="p-8 flex flex-col items-center border-b border-slate-800/60 text-center">
+          <div className="relative group mb-4">
+            <div className="w-24 h-24 rounded-full bg-slate-800 border-4 border-slate-900 shadow-xl flex items-center justify-center text-3xl font-bold text-slate-400 overflow-hidden">
+              {child.avatar_url
+                ? <img src={child.avatar_url} alt={child.name} className="w-full h-full object-cover" />
+                : child.name.charAt(0).toUpperCase()}
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute inset-0 bg-black/60 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs font-semibold text-white"
+            >
+              📷 Edit
+            </button>
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleAvatarChange} />
+          </div>
+          
+          <div className="flex items-center justify-center gap-2 max-w-full px-8">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={handleSaveName}
+              className="bg-transparent text-2xl font-bold text-white text-center w-full outline-none focus:border-b focus:border-cyan-500 transition-all border-b border-transparent placeholder-slate-500"
+              placeholder="Child Name"
+            />
+          </div>
+          {saving && <p className="text-xs text-cyan-400 mt-2">Saving…</p>}
+        </div>
+
+        {/* Device Status & Pairing */}
+        <div className="p-8 space-y-6">
+          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">📱 Device Status</h2>
+          
+          {child.device_id ? (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-xl">✅</div>
+              <div>
+                <p className="text-sm font-bold text-emerald-400">Device Linked</p>
+                <p className="text-xs text-slate-400 mt-1">{child.device_name ?? 'Unknown Device'} • {child.os_type ?? 'Android'}</p>
+                {child.last_seen_at && (
+                  <p className="text-xs text-slate-500 mt-0.5">Last seen: {new Date(child.last_seen_at).toLocaleString()}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-6 text-center">
+              <div className="text-3xl mb-3">📱</div>
+              <p className="text-base font-bold text-amber-400">No Device Linked</p>
+              <p className="text-sm text-slate-400 mt-1 mb-5">Install Guardian on your child's device and enter a pairing code to link it.</p>
+              
+              {pairingCode ? (
+                <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 inline-block">
+                  <p className="text-xs text-slate-400 mb-2 uppercase tracking-widest font-semibold">Pairing Code</p>
+                  <p className="text-4xl font-mono font-bold tracking-widest text-white mb-2">{pairingCode}</p>
+                  <p className="text-xs text-amber-400">Expires in 24 hours</p>
+                </div>
+              ) : (
+                <button
+                  onClick={handleGenerateCode}
+                  disabled={generating}
+                  className="rounded-xl bg-amber-500 py-2.5 px-6 text-sm font-bold text-slate-950 hover:bg-amber-400 transition-colors disabled:opacity-50 inline-block"
+                >
+                  {generating ? 'Generating…' : 'Generate Code'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
