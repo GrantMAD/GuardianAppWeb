@@ -39,11 +39,11 @@ export function RuleCard({ rule }: RuleCardProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+    <div className="rounded-2xl border border-border bg-bg-card p-5">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="font-semibold">{rule.name}</p>
-          <p className="text-sm text-slate-400">{rule.type} rule</p>
+          <p className="text-sm text-text-muted">{rule.type} rule</p>
         </div>
         <label className="inline-flex cursor-pointer items-center">
           <input
@@ -53,8 +53,8 @@ export function RuleCard({ rule }: RuleCardProps) {
             onChange={(event) => handleToggle(event.target.checked)}
             className="peer sr-only"
           />
-          <span className="h-6 w-11 rounded-full bg-slate-700 transition peer-checked:bg-cyan-500" />
-          <span className="ml-2 text-sm text-slate-400">{enabled ? 'On' : 'Off'}</span>
+          <span className="h-6 w-11 rounded-full bg-bg-elevated transition peer-checked:bg-accent" />
+          <span className="ml-2 text-sm text-text-muted">{enabled ? 'On' : 'Off'}</span>
         </label>
       </div>
       {error ? <p className="mt-3 text-sm text-rose-400">{error}</p> : null}

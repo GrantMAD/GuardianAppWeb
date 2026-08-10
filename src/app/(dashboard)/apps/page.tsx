@@ -77,20 +77,20 @@ export default function AppsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-400 font-medium">Installed Apps</p>
-        <h1 className="text-3xl font-bold text-white mt-1">📱 Apps</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium">Installed Apps</p>
+        <h1 className="text-3xl font-bold text-text-primary mt-1">📱 Apps</h1>
         {selectedChild && (
-          <p className="mt-1 text-slate-400 text-sm">
+          <p className="mt-1 text-text-muted text-sm">
             View and manage all applications on {selectedChild.name}'s device.
           </p>
         )}
       </div>
 
       {!selectedChildId ? (
-        <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-bg-card/60 p-10 text-center">
           <p className="text-3xl mb-2">👶</p>
-          <p className="text-white font-semibold">No child selected</p>
-          <p className="text-slate-400 text-sm mt-1">Select a child from the sidebar to see their apps.</p>
+          <p className="text-text-primary font-semibold">No child selected</p>
+          <p className="text-text-muted text-sm mt-1">Select a child from the sidebar to see their apps.</p>
         </div>
       ) : (
         <>
@@ -100,7 +100,7 @@ export default function AppsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search apps…"
-            className="w-full rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all"
+            className="w-full rounded-xl border border-border bg-bg-card px-4 py-3 text-sm text-text-primary placeholder-slate-500 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
           />
 
           {/* Category chips */}
@@ -111,8 +111,8 @@ export default function AppsPage() {
                 onClick={() => setCategory(cat.value)}
                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all border ${
                   category === cat.value
-                    ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300'
-                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                    ? 'bg-accent/20 border-accent/40 text-accent'
+                    : 'bg-bg-card border-border text-text-muted hover:border-text-muted hover:text-text-primary'
                 }`}
               >
                 {cat.label}
@@ -123,11 +123,11 @@ export default function AppsPage() {
           {/* App grid */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 text-slate-600">
-              <div className="w-8 h-8 border-2 border-slate-700 border-t-cyan-500 rounded-full animate-spin mb-3" />
+              <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin mb-3" />
               <p className="text-sm">Loading apps…</p>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-16 text-center text-slate-500">
+            <div className="py-16 text-center text-text-muted">
               <p className="text-3xl mb-2">🔍</p>
               <p className="text-sm">{apps.length === 0 ? 'No apps synced yet from child device.' : 'No apps match your search.'}</p>
             </div>
@@ -145,12 +145,12 @@ export default function AppsPage() {
                         ? 'border-red-500/20 bg-red-500/5 hover:border-red-500/30'
                         : status === 'limited'
                         ? 'border-amber-500/20 bg-amber-500/5 hover:border-amber-500/30'
-                        : 'border-slate-800 bg-slate-900 hover:border-slate-700'
+                        : 'border-border bg-bg-card hover:border-border'
                     }`}
                   >
                     {/* App icon */}
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-xl font-bold text-white"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-xl font-bold text-text-primary"
                       style={{ backgroundColor: color + '33', border: `1px solid ${color}55` }}
                     >
                       {app.icon_url
@@ -160,10 +160,10 @@ export default function AppsPage() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">
+                      <p className="text-sm font-semibold text-text-primary truncate group-hover:text-accent transition-colors">
                         {app.app_name}
                       </p>
-                      <p className="text-xs text-slate-500 capitalize">{app.category}</p>
+                      <p className="text-xs text-text-muted capitalize">{app.category}</p>
                     </div>
 
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">

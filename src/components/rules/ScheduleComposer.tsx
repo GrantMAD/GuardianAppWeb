@@ -76,18 +76,18 @@ export function ScheduleComposer({ children }: ScheduleComposerProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+    <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-bg-card p-5">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Create a schedule</h2>
-          <p className="mt-1 text-sm text-slate-400">Set recurring quiet hours or homework windows.</p>
+          <p className="mt-1 text-sm text-text-muted">Set recurring quiet hours or homework windows.</p>
         </div>
       </div>
 
       <div className="mt-4 space-y-4">
         <label className="block">
-          <span className="mb-2 block text-sm text-slate-400">Child</span>
-          <select value={childId} onChange={(event) => setChildId(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white">
+          <span className="mb-2 block text-sm text-text-muted">Child</span>
+          <select value={childId} onChange={(event) => setChildId(event.target.value)} className="w-full rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary">
             {children.map((child) => (
               <option key={child.id} value={child.id}>
                 {child.name}
@@ -97,23 +97,23 @@ export function ScheduleComposer({ children }: ScheduleComposerProps) {
         </label>
 
         <label className="block">
-          <span className="mb-2 block text-sm text-slate-400">Schedule name</span>
-          <input value={name} onChange={(event) => setName(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white" />
+          <span className="mb-2 block text-sm text-text-muted">Schedule name</span>
+          <input value={name} onChange={(event) => setName(event.target.value)} className="w-full rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary" />
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-2 block text-sm text-slate-400">Start time</span>
-            <input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white" />
+            <span className="mb-2 block text-sm text-text-muted">Start time</span>
+            <input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} className="w-full rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary" />
           </label>
           <label className="block">
-            <span className="mb-2 block text-sm text-slate-400">End time</span>
-            <input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white" />
+            <span className="mb-2 block text-sm text-text-muted">End time</span>
+            <input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} className="w-full rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary" />
           </label>
         </div>
 
         <div>
-          <p className="mb-2 text-sm text-slate-400">Repeat on</p>
+          <p className="mb-2 text-sm text-text-muted">Repeat on</p>
           <div className="flex flex-wrap gap-2">
             {dayOptions.map((day) => {
               const active = daysOfWeek.includes(day.value);
@@ -122,7 +122,7 @@ export function ScheduleComposer({ children }: ScheduleComposerProps) {
                   key={day.value}
                   type="button"
                   onClick={() => toggleDay(day.value)}
-                  className={`rounded-full px-3 py-1 text-sm ${active ? 'bg-cyan-500 text-slate-950' : 'border border-slate-700 text-slate-300'}`}
+                  className={`rounded-full px-3 py-1 text-sm ${active ? 'bg-accent text-bg-primary' : 'border border-border text-text-primary'}`}
                 >
                   {day.label}
                 </button>
@@ -131,7 +131,7 @@ export function ScheduleComposer({ children }: ScheduleComposerProps) {
           </div>
         </div>
 
-        <button type="submit" disabled={saving} className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-70">
+        <button type="submit" disabled={saving} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg-primary disabled:cursor-not-allowed disabled:opacity-70">
           {saving ? 'Saving…' : 'Save schedule'}
         </button>
       </div>

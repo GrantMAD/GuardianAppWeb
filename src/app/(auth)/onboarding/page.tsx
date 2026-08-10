@@ -71,37 +71,37 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-100 relative overflow-hidden">
+    <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center p-6 text-text-primary relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-cyan-500/20 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/20 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 mb-4 text-2xl shadow-[0_0_30px_rgba(6,182,212,0.3)]">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent/20 text-accent mb-4 text-2xl shadow-[0_0_30px_rgba(6,182,212,0.3)]">
             ✨
           </div>
           <h1 className="text-3xl font-bold">Welcome to Guardian</h1>
-          <p className="text-slate-400 mt-2">Let's set up your family account.</p>
+          <p className="text-text-muted mt-2">Let's set up your family account.</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl p-8 shadow-2xl">
+        <div className="rounded-2xl border border-border bg-bg-card/80 backdrop-blur-xl p-8 shadow-2xl">
           {/* Progress indicators */}
           <div className="flex gap-2 mb-8">
-            <div className={`h-1.5 flex-1 rounded-full ${step >= 1 ? 'bg-cyan-500' : 'bg-slate-800'}`} />
-            <div className={`h-1.5 flex-1 rounded-full ${step >= 2 ? 'bg-cyan-500' : 'bg-slate-800'}`} />
+            <div className={`h-1.5 flex-1 rounded-full ${step >= 1 ? 'bg-accent' : 'bg-bg-elevated'}`} />
+            <div className={`h-1.5 flex-1 rounded-full ${step >= 2 ? 'bg-accent' : 'bg-bg-elevated'}`} />
           </div>
 
           {step === 1 ? (
             <form onSubmit={handleCreateFamily} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Family Name</label>
+                <label className="block text-sm font-medium text-text-primary mb-2">Family Name</label>
                 <input
                   type="text"
                   value={familyName}
                   onChange={(e) => setFamilyName(e.target.value)}
                   placeholder="e.g. The Smiths"
                   disabled={loading}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3.5 text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all"
+                  className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3.5 text-text-primary placeholder-slate-500 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
                   autoFocus
                 />
               </div>
@@ -111,7 +111,7 @@ export default function OnboardingPage() {
               <button
                 type="submit"
                 disabled={loading || !familyName.trim()}
-                className="w-full rounded-xl bg-cyan-500 py-3.5 text-sm font-bold text-slate-950 hover:bg-cyan-400 disabled:opacity-50 transition-colors shadow-lg shadow-cyan-500/20"
+                className="w-full rounded-xl bg-accent py-3.5 text-sm font-bold text-bg-primary hover:bg-accent disabled:opacity-50 transition-colors shadow-lg shadow-accent/20"
               >
                 {loading ? 'Continuing…' : 'Continue'}
               </button>
@@ -119,15 +119,15 @@ export default function OnboardingPage() {
           ) : (
             <form onSubmit={handleFinish} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">First Child's Name (Optional)</label>
-                <p className="text-xs text-slate-500 mb-4">You can add your child now, or do it later from the dashboard settings.</p>
+                <label className="block text-sm font-medium text-text-primary mb-2">First Child's Name (Optional)</label>
+                <p className="text-xs text-text-muted mb-4">You can add your child now, or do it later from the dashboard settings.</p>
                 <input
                   type="text"
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
                   placeholder="e.g. Alex"
                   disabled={loading}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3.5 text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all"
+                  className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3.5 text-text-primary placeholder-slate-500 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
                   autoFocus
                 />
               </div>
@@ -139,14 +139,14 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={() => handleFinish()}
                   disabled={loading}
-                  className="flex-1 rounded-xl border border-slate-700 py-3.5 text-sm font-semibold text-slate-300 hover:text-white hover:border-slate-600 transition-colors disabled:opacity-50"
+                  className="flex-1 rounded-xl border border-border py-3.5 text-sm font-semibold text-text-primary hover:text-text-primary hover:border-text-muted transition-colors disabled:opacity-50"
                 >
                   Skip for now
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !childName.trim()}
-                  className="flex-1 rounded-xl bg-cyan-500 py-3.5 text-sm font-bold text-slate-950 hover:bg-cyan-400 disabled:opacity-50 transition-colors shadow-lg shadow-cyan-500/20"
+                  className="flex-1 rounded-xl bg-accent py-3.5 text-sm font-bold text-bg-primary hover:bg-accent disabled:opacity-50 transition-colors shadow-lg shadow-accent/20"
                 >
                   {loading ? 'Finishing…' : 'Finish Setup'}
                 </button>

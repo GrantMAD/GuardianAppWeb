@@ -49,14 +49,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const today = DAY_LABELS[new Date().getDay()];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-bg-primary text-text-primary">
       <div className="flex min-h-screen flex-col lg:flex-row">
 
         {/* ─── Sidebar ──────────────────────────────────────────────── */}
         <aside
           className={`
-            fixed inset-y-0 left-0 z-40 border-r border-slate-800/60
-            bg-slate-900/95 backdrop-blur-xl flex flex-col relative
+            fixed inset-y-0 left-0 z-40 border-r border-border
+            bg-bg-card/95 backdrop-blur-xl flex flex-col relative
             transition-all duration-300
             ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
             lg:translate-x-0 lg:static lg:flex
@@ -67,7 +67,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {/* Edge Collapse Button (Half on sidebar, half off) */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex absolute -right-3.5 top-7 z-50 items-center justify-center w-7 h-7 rounded-full bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 shadow-md transition-all duration-200 hover:scale-110"
+            className="hidden lg:flex absolute -right-3.5 top-7 z-50 items-center justify-center w-7 h-7 rounded-full bg-bg-elevated border border-border text-text-primary hover:text-text-primary hover:bg-bg-elevated shadow-md transition-all duration-200 hover:scale-110"
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             <span className="text-[10px] font-bold">
@@ -76,13 +76,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </button>
 
           {/* Brand */}
-          <div className="px-5 py-6 border-b border-slate-800/60 flex items-center justify-between min-h-[85px]">
+          <div className="px-5 py-6 border-b border-border flex items-center justify-between min-h-[85px]">
             {!isCollapsed ? (
               <div className="min-w-0 flex-1 pr-2">
-                <p className="text-xs uppercase tracking-[0.3em] text-cyan-400 font-medium truncate">Guardian Web</p>
-                <h2 className="mt-0.5 text-lg font-bold text-white truncate">Parent Dashboard</h2>
+                <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium truncate">Guardian Web</p>
+                <h2 className="mt-0.5 text-lg font-bold text-text-primary truncate">Parent Dashboard</h2>
                 {family && (
-                  <p className="mt-0.5 text-xs text-slate-500 truncate">
+                  <p className="mt-0.5 text-xs text-text-muted truncate">
                     {greeting()}, {family.name}
                   </p>
                 )}
@@ -96,9 +96,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
           {/* Child selector */}
           {kids.length > 0 && (
-            <div className={`py-4 border-b border-slate-800/60 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+            <div className={`py-4 border-b border-border ${isCollapsed ? 'px-2' : 'px-4'}`}>
               {!isCollapsed && (
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-2 px-2 font-medium">Active child</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-2 px-2 font-medium">Active child</p>
               )}
               <div className="space-y-1">
                 {kids.map((child) => {
@@ -112,13 +112,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         isCollapsed ? 'p-2 justify-center' : 'px-3 py-2.5 text-sm'
                       } ${
                         isSelected
-                          ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300'
-                          : 'text-slate-300 hover:bg-slate-800 border border-transparent'
+                          ? 'bg-accent/15 border border-accent/30 text-accent'
+                          : 'text-text-primary hover:bg-bg-elevated border border-transparent'
                       }`}
                     >
                       <div className={`
                         w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
-                        ${isSelected ? 'bg-cyan-500/30 text-cyan-300' : 'bg-slate-700 text-slate-300'}
+                        ${isSelected ? 'bg-accent/30 text-accent' : 'bg-bg-elevated text-text-primary'}
                       `}>
                         {child.avatar_url
                           ? <img src={child.avatar_url} alt={child.name} className="w-full h-full rounded-full object-cover" />
@@ -129,7 +129,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         <>
                           <span className="font-medium truncate">{child.name}</span>
                           {isSelected && (
-                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />
+                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
                           )}
                         </>
                       )}
@@ -140,7 +140,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href="/settings"
                   title="Add child"
-                  className={`w-full flex items-center rounded-xl text-slate-500 hover:text-slate-400 transition-colors border border-dashed border-slate-700/60 hover:border-slate-600 mt-1 ${
+                  className={`w-full flex items-center rounded-xl text-text-muted hover:text-text-primary transition-colors border border-dashed border-border hover:border-text-muted mt-1 ${
                     isCollapsed ? 'p-2 justify-center text-sm' : 'gap-3 px-3 py-2 text-xs'
                   }`}
                 >
@@ -167,8 +167,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     isCollapsed ? 'p-3 justify-center text-lg' : 'gap-3 px-3 py-2.5 text-sm'
                   } ${
                     active
-                      ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300'
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-transparent'
+                      ? 'bg-accent/15 border border-accent/30 text-accent'
+                      : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary border border-transparent'
                   }`}
                 >
                   <span className="text-base flex-shrink-0">{item.icon}</span>
@@ -179,12 +179,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </nav>
 
           {/* Sign out */}
-          <div className={`py-4 border-t border-slate-800/60 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+          <div className={`py-4 border-t border-border ${isCollapsed ? 'px-2' : 'px-4'}`}>
             <button
               onClick={handleSignOut}
               disabled={signingOut}
               title="Sign Out"
-              className={`w-full flex items-center rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all disabled:opacity-50 ${
+              className={`w-full flex items-center rounded-xl text-red-500 bg-red-500/5 hover:bg-red-500/10 hover:text-red-400 border border-red-500/20 hover:border-red-500/30 transition-all disabled:opacity-50 ${
                 isCollapsed ? 'p-3 justify-center text-lg' : 'gap-3 px-3 py-2.5 text-sm font-medium'
               }`}
             >
@@ -205,15 +205,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         {/* ─── Main content ──────────────────────────────────────────── */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Mobile topbar */}
-          <header className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b border-slate-800/60 bg-slate-950/90 backdrop-blur-xl lg:hidden">
+          <header className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b border-border bg-bg-primary/90 backdrop-blur-xl lg:hidden">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="p-2 rounded-lg bg-slate-800 text-slate-300"
+                className="p-2 rounded-lg bg-bg-elevated text-text-primary"
               >
                 ☰
               </button>
-              <p className="text-sm font-semibold text-white">Guardian Web</p>
+              <p className="text-sm font-semibold text-text-primary">Guardian Web</p>
             </div>
           </header>
 

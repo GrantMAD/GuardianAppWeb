@@ -118,3 +118,14 @@ export async function generatePairingCode(
   if (error) throw error;
   return data as string;
 }
+
+export async function updateFamilyTheme(familyId: string, theme: 'light' | 'dark'): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  
+  const { error } = await supabase
+    .from('families')
+    .update({ theme })
+    .eq('id', familyId);
+    
+  if (error) throw error;
+}

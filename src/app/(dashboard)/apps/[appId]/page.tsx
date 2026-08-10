@@ -107,7 +107,7 @@ export default function AppDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-slate-600">
-        <div className="w-8 h-8 border-2 border-slate-700 border-t-cyan-500 rounded-full animate-spin mb-3" />
+        <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin mb-3" />
         <p className="text-sm">Loading app data…</p>
       </div>
     );
@@ -116,21 +116,21 @@ export default function AppDetailPage() {
   return (
     <div className="max-w-2xl space-y-6">
       {/* Back */}
-      <Link href="/apps" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors">
+      <Link href="/apps" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors">
         ← Back to Apps
       </Link>
 
       {/* App header card */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 flex items-center gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl font-bold text-white overflow-hidden flex-shrink-0">
+      <div className="rounded-2xl border border-border bg-bg-card p-5 flex items-center gap-4">
+        <div className="w-16 h-16 rounded-2xl bg-bg-elevated border border-border flex items-center justify-center text-2xl font-bold text-text-primary overflow-hidden flex-shrink-0">
           {appInfo?.icon_url
             ? <img src={appInfo.icon_url} alt={appInfo.app_name} className="w-12 h-12 rounded-xl object-contain" />
             : appInfo?.app_name?.charAt(0) ?? '?'
           }
         </div>
         <div className="min-w-0">
-          <h1 className="text-xl font-bold text-white truncate">{appInfo?.app_name ?? 'Unknown App'}</h1>
-          <p className="text-sm text-slate-400 capitalize mt-0.5">{appInfo?.category ?? 'other'}</p>
+          <h1 className="text-xl font-bold text-text-primary truncate">{appInfo?.app_name ?? 'Unknown App'}</h1>
+          <p className="text-sm text-text-muted capitalize mt-0.5">{appInfo?.category ?? 'other'}</p>
           {appInfo?.package_name && (
             <p className="text-xs text-slate-600 mt-0.5 font-mono truncate">{appInfo.package_name}</p>
           )}
@@ -139,8 +139,8 @@ export default function AppDetailPage() {
 
       {/* Time limit ring */}
       {timeLimit && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 flex flex-col items-center gap-3">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">Daily Usage</p>
+        <div className="rounded-2xl border border-border bg-bg-card p-6 flex flex-col items-center gap-3">
+          <p className="text-xs text-text-muted uppercase tracking-wider">Daily Usage</p>
           <div className="relative w-28 h-28">
             <svg className="w-28 h-28 -rotate-90" viewBox="0 0 112 112">
               <circle cx="56" cy="56" r="48" fill="none" stroke="#1e293b" strokeWidth="10" />
@@ -155,19 +155,19 @@ export default function AppDetailPage() {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-bold text-white">{limitPct}%</span>
-              <span className="text-[10px] text-slate-500">used</span>
+              <span className="text-xl font-bold text-text-primary">{limitPct}%</span>
+              <span className="text-[10px] text-text-muted">used</span>
             </div>
           </div>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-text-muted">
             {formatMinutes(todayMins)} used of {formatMinutes(timeLimit.daily_limit_minutes ?? 0)} limit
           </p>
         </div>
       )}
 
       {/* Weekly chart */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-        <h2 className="text-sm font-semibold text-slate-300 mb-4">📆 Last 7 Days</h2>
+      <div className="rounded-2xl border border-border bg-bg-card p-6">
+        <h2 className="text-sm font-semibold text-text-primary mb-4">📆 Last 7 Days</h2>
         <div className="flex items-end gap-2 h-24">
           {weekData.map((d) => (
             <div key={d.label} className="flex flex-1 flex-col items-center gap-1.5">
@@ -176,21 +176,21 @@ export default function AppDetailPage() {
                 style={{ height: `${Math.max(3, (d.minutes / maxWeek) * 88)}px` }}
                 title={`${d.label}: ${formatMinutes(d.minutes)}`}
               />
-              <span className="text-[9px] text-slate-500">{d.label}</span>
+              <span className="text-[9px] text-text-muted">{d.label}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Rules */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-slate-300">🛡️ Rules</h2>
+      <div className="rounded-2xl border border-border bg-bg-card p-6 space-y-4">
+        <h2 className="text-sm font-semibold text-text-primary">🛡️ Rules</h2>
 
         {/* Block toggle */}
-        <div className="flex items-center justify-between rounded-xl bg-slate-800/60 border border-slate-700/60 px-4 py-3">
+        <div className="flex items-center justify-between rounded-xl bg-bg-elevated/60 border border-border/60 px-4 py-3">
           <div>
-            <p className="text-sm font-medium text-white">Block App</p>
-            <p className="text-xs text-slate-500 mt-0.5">Child cannot open this app</p>
+            <p className="text-sm font-medium text-text-primary">Block App</p>
+            <p className="text-xs text-text-muted mt-0.5">Child cannot open this app</p>
           </div>
           <button
             onClick={handleToggleBlock}
@@ -207,15 +207,15 @@ export default function AppDetailPage() {
 
         {/* Time limit */}
         {timeLimit ? (
-          <div className="flex items-center justify-between rounded-xl bg-slate-800/60 border border-slate-700/60 px-4 py-3">
+          <div className="flex items-center justify-between rounded-xl bg-bg-elevated/60 border border-border/60 px-4 py-3">
             <div>
-              <p className="text-sm font-medium text-white">Daily Limit</p>
+              <p className="text-sm font-medium text-text-primary">Daily Limit</p>
               <p className="text-sm font-bold text-amber-400 mt-0.5">{formatMinutes(timeLimit.daily_limit_minutes ?? 0)}</p>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => { setLimitMinutes(timeLimit.daily_limit_minutes ?? 60); setShowLimitForm(true); }}
-                className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                className="text-xs text-accent hover:text-accent transition-colors"
               >
                 Edit
               </button>
@@ -230,7 +230,7 @@ export default function AppDetailPage() {
         ) : (
           <button
             onClick={() => setShowLimitForm(true)}
-            className="w-full rounded-xl border border-dashed border-slate-700 px-4 py-3 text-sm text-slate-500 hover:text-slate-300 hover:border-slate-600 transition-colors"
+            className="w-full rounded-xl border border-dashed border-border px-4 py-3 text-sm text-text-muted hover:text-text-primary hover:border-text-muted transition-colors"
           >
             + Add Time Limit
           </button>
@@ -238,8 +238,8 @@ export default function AppDetailPage() {
 
         {/* Limit form */}
         {showLimitForm && (
-          <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 space-y-4">
-            <p className="text-sm font-medium text-cyan-300">Set Daily Limit</p>
+          <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-4">
+            <p className="text-sm font-medium text-accent">Set Daily Limit</p>
             <div className="flex items-center gap-3">
               <input
                 type="range"
@@ -248,21 +248,21 @@ export default function AppDetailPage() {
                 step={15}
                 value={limitMinutes}
                 onChange={(e) => setLimitMinutes(Number(e.target.value))}
-                className="flex-1 accent-cyan-500"
+                className="flex-1 accent-accent"
               />
-              <span className="text-sm font-bold text-white w-14 text-right">{formatMinutes(limitMinutes)}</span>
+              <span className="text-sm font-bold text-text-primary w-14 text-right">{formatMinutes(limitMinutes)}</span>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleSaveLimit}
                 disabled={saving}
-                className="flex-1 rounded-xl bg-cyan-500 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition-colors disabled:opacity-50"
+                className="flex-1 rounded-xl bg-accent py-2 text-sm font-semibold text-bg-primary hover:bg-accent transition-colors disabled:opacity-50"
               >
                 {saving ? 'Saving…' : 'Save Limit'}
               </button>
               <button
                 onClick={() => setShowLimitForm(false)}
-                className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors"
+                className="rounded-xl border border-border px-4 py-2 text-sm text-text-muted hover:text-text-primary transition-colors"
               >
                 Cancel
               </button>

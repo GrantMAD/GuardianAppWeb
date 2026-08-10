@@ -59,11 +59,11 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-400 font-medium">Activity</p>
-          <h1 className="text-3xl font-bold text-white mt-1">
+          <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium">Activity</p>
+          <h1 className="text-3xl font-bold text-text-primary mt-1">
             🔔 Notifications
             {unreadCount > 0 && (
-              <span className="ml-3 rounded-full bg-cyan-500/20 border border-cyan-500/40 px-2 py-0.5 text-sm font-semibold text-cyan-400">
+              <span className="ml-3 rounded-full bg-accent/20 border border-accent/40 px-2 py-0.5 text-sm font-semibold text-accent">
                 {unreadCount} new
               </span>
             )}
@@ -72,7 +72,7 @@ export default function NotificationsPage() {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-400 hover:text-white hover:border-slate-600 transition-all disabled:opacity-50"
+          className="rounded-xl border border-border bg-bg-card px-3 py-2 text-sm text-text-muted hover:text-text-primary hover:border-text-muted transition-all disabled:opacity-50"
         >
           {refreshing ? '⟳ Refreshing…' : '⟳ Refresh'}
         </button>
@@ -81,14 +81,14 @@ export default function NotificationsPage() {
       {/* Content */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-24 text-slate-600">
-          <div className="w-8 h-8 border-2 border-slate-700 border-t-cyan-500 rounded-full animate-spin mb-3" />
+          <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin mb-3" />
           <p className="text-sm">Loading notifications…</p>
         </div>
       ) : notifications.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 py-20 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-bg-card/60 py-20 text-center">
           <p className="text-4xl mb-3">📭</p>
-          <p className="text-white font-semibold">All caught up!</p>
-          <p className="text-slate-400 text-sm mt-1">No notifications right now.</p>
+          <p className="text-text-primary font-semibold">All caught up!</p>
+          <p className="text-text-muted text-sm mt-1">No notifications right now.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -97,25 +97,25 @@ export default function NotificationsPage() {
               key={notif.id}
               className={`flex gap-4 rounded-2xl border p-4 transition-all ${
                 notif.is_read
-                  ? 'border-slate-800 bg-slate-900'
-                  : 'border-cyan-500/20 bg-cyan-500/5'
+                  ? 'border-border bg-bg-card'
+                  : 'border-accent/20 bg-accent/5'
               }`}
             >
               {/* Icon */}
-              <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xl flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-bg-elevated border border-border flex items-center justify-center text-xl flex-shrink-0">
                 {TYPE_ICONS[notif.type] ?? '🔔'}
               </div>
 
               {/* Body */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white">{notif.title}</p>
-                <p className="text-sm text-slate-400 mt-0.5 leading-relaxed">{notif.body}</p>
+                <p className="text-sm font-semibold text-text-primary">{notif.title}</p>
+                <p className="text-sm text-text-muted mt-0.5 leading-relaxed">{notif.body}</p>
                 <p className="text-xs text-slate-600 mt-1.5">{timeAgo(notif.sent_at)}</p>
               </div>
 
               {/* Unread dot */}
               {!notif.is_read && (
-                <div className="w-2 h-2 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-accent mt-1.5 flex-shrink-0" />
               )}
             </div>
           ))}

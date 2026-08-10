@@ -94,7 +94,7 @@ export default function DashboardPage() {
       value: loading ? '—' : formatMinutes(totalMins ?? 0),
       detail: selectedChild?.name ?? 'No child selected',
       icon: '⏱️',
-      color: 'text-cyan-400',
+      color: 'text-accent',
     },
     {
       label: 'Apps used today',
@@ -116,20 +116,20 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-400 font-medium">Family overview</p>
-        <h1 className="text-3xl font-bold text-white mt-1">Parent Dashboard</h1>
-        <p className="mt-1 text-slate-400 text-sm">Monitor usage, manage restrictions, and stay on top of your family.</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium">Family overview</p>
+        <h1 className="text-3xl font-bold text-text-primary mt-1">Parent Dashboard</h1>
+        <p className="mt-1 text-text-muted text-sm">Monitor usage, manage restrictions, and stay on top of your family.</p>
       </div>
 
       {/* No child selected state */}
       {!selectedChildId && !loading && (
-        <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-bg-card/60 p-10 text-center">
           <p className="text-3xl mb-3">👶</p>
-          <p className="text-white font-semibold mb-1">No child selected</p>
-          <p className="text-slate-400 text-sm mb-4">Add a child profile in Settings, then pair their device.</p>
+          <p className="text-text-primary font-semibold mb-1">No child selected</p>
+          <p className="text-text-muted text-sm mb-4">Add a child profile in Settings, then pair their device.</p>
           <Link
             href="/settings"
-            className="inline-block rounded-xl bg-cyan-500 px-5 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition-colors"
+            className="inline-block rounded-xl bg-accent px-5 py-2 text-sm font-semibold text-bg-primary hover:bg-accent transition-colors"
           >
             Go to Settings
           </Link>
@@ -141,13 +141,13 @@ export default function DashboardPage() {
           {/* Stat cards */}
           <div className="grid gap-4 md:grid-cols-3">
             {usageSummary.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+              <div key={item.label} className="rounded-2xl border border-border bg-bg-card p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">{item.icon}</span>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">{item.label}</p>
+                  <p className="text-xs text-text-muted uppercase tracking-wider">{item.label}</p>
                 </div>
                 <p className={`text-3xl font-bold ${item.color}`}>{item.value}</p>
-                <p className="mt-1 text-xs text-slate-500">{item.detail}</p>
+                <p className="mt-1 text-xs text-text-muted">{item.detail}</p>
               </div>
             ))}
           </div>
@@ -160,12 +160,12 @@ export default function DashboardPage() {
                 <h2 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Pending Requests</h2>
               </div>
               {requests.map((req) => (
-                <div key={req.id} className="flex items-center justify-between gap-4 rounded-xl bg-slate-900 border border-slate-800 px-4 py-3">
+                <div key={req.id} className="flex items-center justify-between gap-4 rounded-xl bg-bg-card border border-border px-4 py-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-white text-sm truncate">
+                    <p className="font-medium text-text-primary text-sm truncate">
                       {req.children?.name ?? 'Child'} — {req.installed_apps?.app_name ?? 'App'}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">{req.message ?? 'Requested extra time'}</p>
+                    <p className="text-xs text-text-muted truncate">{req.message ?? 'Requested extra time'}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
@@ -189,9 +189,9 @@ export default function DashboardPage() {
           {/* Charts row */}
           <div className="grid gap-6 xl:grid-cols-[1.4fr_0.6fr]">
             {/* Weekly bar chart */}
-            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-base font-semibold text-white">Weekly Screen Time</h2>
-              <p className="text-xs text-slate-500 mt-0.5 mb-5">Last 7 days for {selectedChild?.name}</p>
+            <div className="rounded-2xl border border-border bg-bg-card p-6">
+              <h2 className="text-base font-semibold text-text-primary">Weekly Screen Time</h2>
+              <p className="text-xs text-text-muted mt-0.5 mb-5">Last 7 days for {selectedChild?.name}</p>
               {loading ? (
                 <div className="h-32 flex items-center justify-center text-slate-600 text-sm">Loading chart…</div>
               ) : (
@@ -199,11 +199,11 @@ export default function DashboardPage() {
                   {weeklyData.map((entry) => (
                     <div key={entry.day} className="flex flex-1 flex-col items-center gap-2">
                       <div
-                        className="w-full rounded-t-lg bg-gradient-to-t from-cyan-600 to-cyan-400 transition-all"
+                        className="w-full rounded-t-lg bg-gradient-to-t from-accent to-accent transition-all"
                         style={{ height: `${Math.max(4, (entry.minutes / maxWeekly) * 112)}px` }}
                         title={`${entry.day}: ${formatMinutes(entry.minutes)}`}
                       />
-                      <span className="text-[10px] text-slate-500">{entry.day}</span>
+                      <span className="text-[10px] text-text-muted">{entry.day}</span>
                     </div>
                   ))}
                 </div>
@@ -211,10 +211,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Top apps today */}
-            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+            <div className="rounded-2xl border border-border bg-bg-card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-white">Top Apps Today</h2>
-                <Link href="/apps" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">
+                <h2 className="text-base font-semibold text-text-primary">Top Apps Today</h2>
+                <Link href="/apps" className="text-xs text-accent hover:text-accent transition-colors">
                   See all →
                 </Link>
               </div>
@@ -229,18 +229,18 @@ export default function DashboardPage() {
                     const cat = log.installed_apps?.category ?? 'other';
                     const color = CATEGORY_COLORS[cat] ?? '#9E9E9E';
                     return (
-                      <li key={log.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-800/70 px-3 py-2">
+                      <li key={log.id} className="flex items-center justify-between gap-3 rounded-xl bg-bg-elevated/70 px-3 py-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <div
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: color }}
                           />
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{name}</p>
-                            <p className="text-[10px] text-slate-500 capitalize">{cat}</p>
+                            <p className="text-sm font-medium text-text-primary truncate">{name}</p>
+                            <p className="text-[10px] text-text-muted capitalize">{cat}</p>
                           </div>
                         </div>
-                        <span className="text-xs text-cyan-300 font-medium flex-shrink-0">
+                        <span className="text-xs text-accent font-medium flex-shrink-0">
                           {formatMinutes(log.usage_minutes)}
                         </span>
                       </li>
@@ -253,7 +253,7 @@ export default function DashboardPage() {
 
           {/* Quick actions */}
           <div>
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Quick Actions</h2>
+            <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
                 { href: '/apps', icon: '📱', label: 'View Apps' },
@@ -264,10 +264,10 @@ export default function DashboardPage() {
                 <Link
                   key={action.label}
                   href={action.href}
-                  className="rounded-2xl border border-slate-800 bg-slate-900 p-4 flex flex-col items-center gap-2 hover:border-cyan-500/40 hover:bg-slate-800/80 transition-all group"
+                  className="rounded-2xl border border-border bg-bg-card p-4 flex flex-col items-center gap-2 hover:border-accent/40 hover:bg-bg-elevated/80 transition-all group"
                 >
                   <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
-                  <span className="text-xs font-medium text-slate-300 group-hover:text-white transition-colors">{action.label}</span>
+                  <span className="text-xs font-medium text-text-primary group-hover:text-text-primary transition-colors">{action.label}</span>
                 </Link>
               ))}
             </div>

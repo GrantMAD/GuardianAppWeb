@@ -41,39 +41,39 @@ export function RequestsPanel({ requests }: RequestsPanelProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+    <div className="rounded-2xl border border-border bg-bg-card p-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Permission requests</h2>
-          <p className="text-sm text-slate-400">Review and respond to your child’s recent requests.</p>
+          <p className="text-sm text-text-muted">Review and respond to your child’s recent requests.</p>
         </div>
       </div>
 
       <div className="mt-4 space-y-3">
         {visibleRequests.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-700 bg-slate-800/40 p-4 text-sm text-slate-400">
+          <div className="rounded-xl border border-dashed border-border bg-bg-elevated/40 p-4 text-sm text-text-muted">
             No pending permission requests right now.
           </div>
         ) : (
           visibleRequests.map((request) => (
-            <div key={request.id} className="rounded-xl border border-slate-800 bg-slate-800/60 p-4">
+            <div key={request.id} className="rounded-xl border border-border bg-bg-elevated/60 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">{request.child}</p>
-                  <p className="mt-1 text-sm text-slate-400">{request.message}</p>
+                  <p className="mt-1 text-sm text-text-muted">{request.message}</p>
                 </div>
-                <span className="rounded-full bg-cyan-500/10 px-3 py-1 text-sm text-cyan-300">{request.status}</span>
+                <span className="rounded-full bg-accent/10 px-3 py-1 text-sm text-accent">{request.status}</span>
               </div>
               <div className="mt-3 flex gap-2">
                 <button
-                  className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-medium text-slate-950 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-lg bg-accent px-3 py-2 text-sm font-medium text-bg-primary disabled:cursor-not-allowed disabled:opacity-70"
                   onClick={() => handleDecision(request.id, 'approved')}
                   disabled={updatingId === request.id}
                 >
                   {updatingId === request.id ? 'Working…' : 'Approve'}
                 </button>
                 <button
-                  className="rounded-lg border border-slate-700 px-3 py-2 text-sm font-medium text-slate-300 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-text-primary disabled:cursor-not-allowed disabled:opacity-70"
                   onClick={() => handleDecision(request.id, 'denied')}
                   disabled={updatingId === request.id}
                 >

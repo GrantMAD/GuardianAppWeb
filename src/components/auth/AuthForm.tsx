@@ -41,21 +41,21 @@ export function AuthForm({ mode }: AuthFormProps) {
     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
       {mode === 'signup' && (
         <div>
-          <label className="mb-2 block text-sm text-slate-300" htmlFor="familyName">
+          <label className="mb-2 block text-sm text-text-primary" htmlFor="familyName">
             Family name
           </label>
           <input
             id="familyName"
             value={familyName}
             onChange={(event) => setFamilyName(event.target.value)}
-            className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none"
+            className="w-full rounded-xl border border-border bg-bg-primary px-3 py-2 text-sm outline-none"
             placeholder="The Smith Family"
           />
         </div>
       )}
 
       <div>
-        <label className="mb-2 block text-sm text-slate-300" htmlFor="email">
+        <label className="mb-2 block text-sm text-text-primary" htmlFor="email">
           Email
         </label>
         <input
@@ -63,14 +63,14 @@ export function AuthForm({ mode }: AuthFormProps) {
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none"
+          className="w-full rounded-xl border border-border bg-bg-primary px-3 py-2 text-sm outline-none"
           placeholder="parent@example.com"
           required
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm text-slate-300" htmlFor="password">
+        <label className="mb-2 block text-sm text-text-primary" htmlFor="password">
           Password
         </label>
         <input
@@ -78,7 +78,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none"
+          className="w-full rounded-xl border border-border bg-bg-primary px-3 py-2 text-sm outline-none"
           placeholder={mode === 'signup' ? 'Create a password' : '••••••••'}
           required
         />
@@ -89,14 +89,14 @@ export function AuthForm({ mode }: AuthFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl bg-cyan-500 px-4 py-2.5 font-medium text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-xl bg-accent px-4 py-2.5 font-medium text-bg-primary transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-70"
       >
         {loading ? 'Working…' : mode === 'signup' ? 'Create account' : 'Sign in'}
       </button>
 
-      <p className="text-center text-sm text-slate-400">
+      <p className="text-center text-sm text-text-muted">
         {mode === 'signup' ? 'Already have an account?' : 'Need an account?'}{' '}
-        <Link href={mode === 'signup' ? '/login' : '/signup'} className="font-medium text-cyan-300">
+        <Link href={mode === 'signup' ? '/login' : '/signup'} className="font-medium text-accent">
           {mode === 'signup' ? 'Sign in' : 'Create one'}
         </Link>
       </p>

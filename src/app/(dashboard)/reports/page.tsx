@@ -60,7 +60,7 @@ export default function ReportsPage() {
   const maxApp = Math.max(...topApps.map((a) => a.minutes), 1);
 
   const statCards = [
-    { label: 'This week',  value: formatMinutes(totalWeekMins), icon: '📅', color: 'text-cyan-400' },
+    { label: 'This week',  value: formatMinutes(totalWeekMins), icon: '📅', color: 'text-accent' },
     { label: 'Daily avg',  value: formatMinutes(avgDailyMins),  icon: '📊', color: 'text-violet-400' },
     { label: 'Peak day',   value: peakDay.label,                icon: '🏆', color: 'text-amber-400' },
     { label: 'Peak usage', value: formatMinutes(peakDay.total), icon: '⏰', color: 'text-rose-400' },
@@ -70,24 +70,24 @@ export default function ReportsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-400 font-medium">Analytics</p>
-        <h1 className="text-3xl font-bold text-white mt-1">📈 Reports</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium">Analytics</p>
+        <h1 className="text-3xl font-bold text-text-primary mt-1">📈 Reports</h1>
         {selectedChild && (
-          <p className="mt-1 text-slate-400 text-sm">
+          <p className="mt-1 text-text-muted text-sm">
             Screen time breakdown for {selectedChild.name} — last 7 days.
           </p>
         )}
       </div>
 
       {!selectedChildId ? (
-        <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/60 p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-border bg-bg-card/60 p-10 text-center">
           <p className="text-3xl mb-2">📊</p>
-          <p className="text-white font-semibold">No child selected</p>
-          <p className="text-slate-400 text-sm mt-1">Select a child from the sidebar to view their reports.</p>
+          <p className="text-text-primary font-semibold">No child selected</p>
+          <p className="text-text-muted text-sm mt-1">Select a child from the sidebar to view their reports.</p>
         </div>
       ) : loading ? (
         <div className="flex flex-col items-center justify-center py-24 text-slate-600">
-          <div className="w-8 h-8 border-2 border-slate-700 border-t-cyan-500 rounded-full animate-spin mb-3" />
+          <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin mb-3" />
           <p className="text-sm">Loading reports…</p>
         </div>
       ) : (
@@ -95,10 +95,10 @@ export default function ReportsPage() {
           {/* Stat cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {statCards.map((s) => (
-              <div key={s.label} className="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+              <div key={s.label} className="rounded-2xl border border-border bg-bg-card p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">{s.icon}</span>
-                  <p className="text-xs text-slate-500 uppercase tracking-wider">{s.label}</p>
+                  <p className="text-xs text-text-muted uppercase tracking-wider">{s.label}</p>
                 </div>
                 <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
               </div>
@@ -106,23 +106,23 @@ export default function ReportsPage() {
           </div>
 
           {/* Weekly bar chart */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-sm font-semibold text-slate-300 mb-1">📊 Daily Screen Time</h2>
-            <p className="text-xs text-slate-500 mb-5">Total device usage per day over the past 7 days</p>
+          <div className="rounded-2xl border border-border bg-bg-card p-6">
+            <h2 className="text-sm font-semibold text-text-primary mb-1">📊 Daily Screen Time</h2>
+            <p className="text-xs text-text-muted mb-5">Total device usage per day over the past 7 days</p>
             {weekData.every((d) => d.total === 0) ? (
               <p className="text-center text-slate-600 text-sm py-8">No usage data for this period.</p>
             ) : (
               <div className="flex items-end gap-3 h-36">
                 {weekData.map((d) => (
                   <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
-                    <span className="text-[10px] text-slate-500">{d.total > 0 ? formatMinutes(d.total) : ''}</span>
+                    <span className="text-[10px] text-text-muted">{d.total > 0 ? formatMinutes(d.total) : ''}</span>
                     <div
-                      className="w-full rounded-t-lg bg-gradient-to-t from-cyan-600 to-cyan-400 transition-all cursor-pointer hover:brightness-110"
+                      className="w-full rounded-t-lg bg-gradient-to-t from-accent to-accent transition-all cursor-pointer hover:brightness-110"
                       style={{ height: `${Math.max(4, (d.total / maxWeek) * 104)}px` }}
                       onClick={() => toggleDate(d.date)}
                       title={`${d.label}: ${formatMinutes(d.total)}`}
                     />
-                    <span className="text-xs text-slate-500">{d.label}</span>
+                    <span className="text-xs text-text-muted">{d.label}</span>
                   </div>
                 ))}
               </div>
@@ -131,14 +131,14 @@ export default function ReportsPage() {
 
           {/* Top apps */}
           {topApps.length > 0 && (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-sm font-semibold text-slate-300 mb-4">📱 Top Apps This Week</h2>
+            <div className="rounded-2xl border border-border bg-bg-card p-6">
+              <h2 className="text-sm font-semibold text-text-primary mb-4">📱 Top Apps This Week</h2>
               <div className="space-y-3">
                 {topApps.map((app) => (
                   <div key={app.name} className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: app.color }} />
-                    <p className="text-sm text-slate-300 w-28 truncate flex-shrink-0">{app.name}</p>
-                    <div className="flex-1 rounded-full bg-slate-800 h-2 overflow-hidden">
+                    <p className="text-sm text-text-primary w-28 truncate flex-shrink-0">{app.name}</p>
+                    <div className="flex-1 rounded-full bg-bg-elevated h-2 overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
@@ -147,7 +147,7 @@ export default function ReportsPage() {
                         }}
                       />
                     </div>
-                    <span className="text-xs text-slate-400 w-12 text-right flex-shrink-0">{formatMinutes(app.minutes)}</span>
+                    <span className="text-xs text-text-muted w-12 text-right flex-shrink-0">{formatMinutes(app.minutes)}</span>
                   </div>
                 ))}
               </div>
@@ -156,26 +156,26 @@ export default function ReportsPage() {
 
           {/* Day-by-day breakdown */}
           <div>
-            <h2 className="text-xs uppercase tracking-wider text-slate-500 mb-3">📅 Day by Day</h2>
+            <h2 className="text-xs uppercase tracking-wider text-text-muted mb-3">📅 Day by Day</h2>
             <div className="space-y-2">
               {weekData.map((day) => {
                 const isExpanded = expandedDates.includes(day.date);
                 return (
-                  <div key={day.date} className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden">
+                  <div key={day.date} className="rounded-2xl border border-border bg-bg-card overflow-hidden">
                     <button
                       onClick={() => toggleDate(day.date)}
-                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-800/50 transition-colors"
+                      className="w-full flex items-center justify-between px-5 py-4 hover:bg-bg-elevated/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-white">{day.label}</span>
-                        <span className="text-xs text-slate-500">{day.date}</span>
+                        <span className="text-sm font-semibold text-text-primary">{day.label}</span>
+                        <span className="text-xs text-text-muted">{day.date}</span>
                         <span className="text-slate-600 text-xs">{isExpanded ? '▲' : '▼'}</span>
                       </div>
-                      <span className="text-sm font-bold text-cyan-400">{formatMinutes(day.total)}</span>
+                      <span className="text-sm font-bold text-accent">{formatMinutes(day.total)}</span>
                     </button>
 
                     {isExpanded && (
-                      <div className="px-5 pb-4 border-t border-slate-800/60">
+                      <div className="px-5 pb-4 border-t border-border/60">
                         {day.logs.length === 0 ? (
                           <p className="text-slate-600 text-xs py-3">No usage on this day.</p>
                         ) : (
@@ -187,8 +187,8 @@ export default function ReportsPage() {
                               return (
                                 <div key={u.id} className="flex items-center gap-2">
                                   <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                                  <span className="text-xs text-slate-400 flex-1 truncate">{name}</span>
-                                  <span className="text-xs text-slate-500">{formatMinutes(u.usage_minutes)}</span>
+                                  <span className="text-xs text-text-muted flex-1 truncate">{name}</span>
+                                  <span className="text-xs text-text-muted">{formatMinutes(u.usage_minutes)}</span>
                                 </div>
                               );
                             })}

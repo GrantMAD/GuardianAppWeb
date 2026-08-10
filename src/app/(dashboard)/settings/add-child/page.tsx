@@ -38,26 +38,26 @@ export default function AddChildPage() {
 
   return (
     <div className="max-w-xl mx-auto py-12">
-      <Link href="/settings" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors mb-8">
+      <Link href="/settings" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-8">
         ← Back to Settings
       </Link>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl shadow-black/50">
-        <h1 className="text-2xl font-bold text-white">Add a Child Profile</h1>
-        <p className="mt-2 text-sm text-slate-400 mb-8">
+      <div className="rounded-2xl border border-border bg-bg-card p-8 shadow-xl shadow-black/50">
+        <h1 className="text-2xl font-bold text-text-primary">Add a Child Profile</h1>
+        <p className="mt-2 text-sm text-text-muted mb-8">
           Create a profile for your child. You'll be able to pair their device in the next step.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Child's Name</label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Child's Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Alex"
               disabled={loading}
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 placeholder-slate-500 outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all disabled:opacity-50"
+              className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3 text-text-primary placeholder-slate-500 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all disabled:opacity-50"
               autoFocus
             />
           </div>
@@ -68,7 +68,7 @@ export default function AddChildPage() {
             <button
               type="submit"
               disabled={loading || !name.trim()}
-              className="w-full rounded-xl bg-cyan-500 py-3.5 text-sm font-bold text-slate-950 hover:bg-cyan-400 disabled:opacity-50 transition-colors"
+              className="w-full rounded-xl bg-accent py-3.5 text-sm font-bold text-bg-primary hover:bg-accent disabled:opacity-50 transition-colors"
             >
               {loading ? 'Creating…' : 'Create Profile'}
             </button>
