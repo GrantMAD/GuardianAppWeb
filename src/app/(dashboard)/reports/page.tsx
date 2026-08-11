@@ -47,12 +47,12 @@ export default function ReportsPage() {
   const maxWeek = Math.max(...weekData.map((d) => d.total), 1);
 
   // Top apps across the week
-  const appTotals: Record<string, { name: string; minutes: number; color: string }> = {};
+  const appTotals: Record<string, { name: string; minutes: number; color: string; icon_url?: string }> = {};
   weekData.forEach((day) => {
     day.logs.forEach((u: any) => {
       const name = u.installed_apps?.app_name ?? 'Unknown';
       const cat = u.installed_apps?.category ?? 'other';
-      if (!appTotals[name]) appTotals[name] = { name, minutes: 0, color: CATEGORY_COLORS[cat] ?? '#9E9E9E' };
+      if (!appTotals[name]) appTotals[name] = { name, minutes: 0, color: CATEGORY_COLORS[cat] ?? '#9E9E9E', icon_url: u.installed_apps?.icon_url };
       appTotals[name].minutes += u.usage_minutes;
     });
   });
@@ -136,8 +136,14 @@ export default function ReportsPage() {
               <div className="space-y-3">
                 {topApps.map((app) => (
                   <div key={app.name} className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: app.color }} />
-                    <p className="text-sm text-text-primary w-28 truncate flex-shrink-0">{app.name}</p>
+                    <div className="w-6 h-6 rounded flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: app.color + '22' }}>
+                      {app.icon_url ? (
+                        <img src={app.icon_url} alt={app.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] font-bold" style={{ color: app.color }}>{app.name.charAt(0)}</span>
+                      )}
+                    </div>
+                    <p className="text-sm text-text-primary w-24 truncate flex-shrink-0">{app.name}</p>
                     <div className="flex-1 rounded-full bg-bg-elevated h-2 overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
@@ -186,7 +192,13 @@ export default function ReportsPage() {
                               const color = CATEGORY_COLORS[cat] ?? '#9E9E9E';
                               return (
                                 <div key={u.id} className="flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                                  <div className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: color + '22' }}>
+                                    {u.installed_apps?.icon_url ? (
+                                      <img src={u.installed_apps.icon_url} alt={name} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <span className="text-[9px] font-bold" style={{ color }}>{name.charAt(0)}</span>
+                                    )}
+                                  </div>
                                   <span className="text-xs text-text-muted flex-1 truncate">{name}</span>
                                   <span className="text-xs text-text-muted">{formatMinutes(u.usage_minutes)}</span>
                                 </div>

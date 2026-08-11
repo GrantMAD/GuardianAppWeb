@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useFamilyStore } from '@/store/familyStore';
-import { getRules, createRule, deleteRule } from '@/lib/rule-service';
+import { getRules, deleteRule } from '@/lib/rule-service';
 import { getSchedules, createSchedule, deleteSchedule, toggleSchedule } from '@/lib/schedule-service';
 import { getInstalledApps } from '@/lib/usage-service';
+import { logParentAction } from '@/lib/parent-service';
 import type { Rule, Schedule, InstalledApp } from '@/types';
+import Link from 'next/link';
 
 function formatMinutes(mins: number) {
   if (mins < 60) return `${mins}m`;
@@ -17,24 +19,12 @@ function formatMinutes(mins: number) {
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function RulesPage() {
-  const { selectedChildId, children } = useFamilyStore();
+  const { selectedChildId, children, family } = useFamilyStore();
   const selectedChild = children.find((c) => c.id === selectedChildId);
 
   const [rules, setRules] = useState<Rule[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [apps, setApps] = useState<InstalledApp[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Create limit form state
-  const [showLimitForm, setShowLimitForm] = useState(false);
-  const [limitAppId, setLimitAppId] = useState('');
-  const [limitMinutes, setLimitMinutes] = useState(60);
-  const [savingLimit, setSavingLimit] = useState(false);
-
-  // Create block form state
-  const [showBlockForm, setShowBlockForm] = useState(false);
-  const [blockAppId, setBlockAppId] = useState('');
-  const [savingBlock, setSavingBlock] = useState(false);
 
   // Create schedule form state
   const [showScheduleForm, setShowScheduleForm] = useState(false);
@@ -48,14 +38,12 @@ export default function RulesPage() {
     if (!selectedChildId) return;
     setLoading(true);
     try {
-      const [r, s, a] = await Promise.all([
+      const [r, s] = await Promise.all([
         getRules(selectedChildId),
         getSchedules(selectedChildId),
-        getInstalledApps(selectedChildId),
       ]);
       setRules(r);
       setSchedules(s);
-      setApps((a ?? []) as InstalledApp[]);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -67,32 +55,10 @@ export default function RulesPage() {
 
   const handleDeleteRule = async (ruleId: string) => {
     await deleteRule(ruleId);
+    if (family) {
+      await logParentAction(family.id, 'RULE_REMOVED', `Removed a rule`);
+    }
     setRules((prev) => prev.filter((r) => r.id !== ruleId));
-  };
-
-  const handleSaveLimit = async () => {
-    if (!selectedChildId || !limitAppId) return;
-    setSavingLimit(true);
-    try {
-      await createRule(selectedChildId, 'TIME_LIMIT', limitAppId, undefined, limitMinutes);
-      setShowLimitForm(false);
-      setLimitAppId('');
-      setLimitMinutes(60);
-      await load();
-    } catch (err) { console.error(err); }
-    finally { setSavingLimit(false); }
-  };
-
-  const handleSaveBlock = async () => {
-    if (!selectedChildId || !blockAppId) return;
-    setSavingBlock(true);
-    try {
-      await createRule(selectedChildId, 'BLOCK', blockAppId);
-      setShowBlockForm(false);
-      setBlockAppId('');
-      await load();
-    } catch (err) { console.error(err); }
-    finally { setSavingBlock(false); }
   };
 
   const handleSaveSchedule = async () => {
@@ -109,6 +75,9 @@ export default function RulesPage() {
         block_type: 'block',
         is_active: true,
       });
+      if (family) {
+        await logParentAction(family.id, 'SCHEDULE_CREATED', `Created a new schedule: ${scheduleName}`);
+      }
       setShowScheduleForm(false);
       setScheduleName('');
       setScheduleDays([0, 1, 2, 3, 4, 5, 6]);
@@ -119,11 +88,17 @@ export default function RulesPage() {
 
   const handleDeleteSchedule = async (id: string) => {
     await deleteSchedule(id);
+    if (family) {
+      await logParentAction(family.id, 'SCHEDULE_REMOVED', `Deleted a schedule`);
+    }
     setSchedules((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleToggleSchedule = async (id: string, current: boolean) => {
     await toggleSchedule(id, !current);
+    if (family) {
+      await logParentAction(family.id, 'SCHEDULE_UPDATED', `Toggled a schedule ${!current ? 'on' : 'off'}`);
+    }
     setSchedules((prev) => prev.map((s) => s.id === id ? { ...s, is_active: !current } : s));
   };
 
@@ -133,18 +108,7 @@ export default function RulesPage() {
     );
   };
 
-  const AppSelect = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary outline-none focus:border-accent/50"
-    >
-      <option value="">Select an app…</option>
-      {apps.map((a) => (
-        <option key={a.id} value={a.id}>{a.app_name}</option>
-      ))}
-    </select>
-  );
+
 
   return (
     <div className="space-y-6">
@@ -172,18 +136,18 @@ export default function RulesPage() {
         <>
           {/* Action buttons */}
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setShowLimitForm(true)}
+            <Link
+              href="/rules/create-limit"
               className="flex items-center gap-2 rounded-xl bg-violet-500/15 border border-violet-500/30 px-4 py-2 text-sm font-semibold text-violet-300 hover:bg-violet-500/25 transition-all"
             >
               ⏱️ Add Time Limit
-            </button>
-            <button
-              onClick={() => setShowBlockForm(true)}
+            </Link>
+            <Link
+              href="/rules/create-block"
               className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/20 transition-all"
             >
               🔒 Block App
-            </button>
+            </Link>
             <button
               onClick={() => setShowScheduleForm(true)}
               className="flex items-center gap-2 rounded-xl bg-bg-elevated border border-border px-4 py-2 text-sm font-semibold text-text-primary hover:border-text-muted transition-all"
@@ -191,51 +155,6 @@ export default function RulesPage() {
               🕐 Add Schedule
             </button>
           </div>
-
-          {/* Time limit form */}
-          {showLimitForm && (
-            <div className="rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5 space-y-4">
-              <p className="text-sm font-semibold text-violet-300">⏱️ New Time Limit</p>
-              <AppSelect value={limitAppId} onChange={setLimitAppId} />
-              <div className="flex items-center gap-3">
-                <label className="text-xs text-text-muted w-20 flex-shrink-0">Limit</label>
-                <input
-                  type="range" min={15} max={480} step={15} value={limitMinutes}
-                  onChange={(e) => setLimitMinutes(Number(e.target.value))}
-                  className="flex-1 accent-violet-500"
-                />
-                <span className="text-sm font-bold text-text-primary w-14 text-right">{formatMinutes(limitMinutes)}</span>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={handleSaveLimit} disabled={savingLimit || !limitAppId}
-                  className="flex-1 rounded-xl bg-violet-500 py-2 text-sm font-semibold text-text-primary hover:bg-violet-400 disabled:opacity-50 transition-colors">
-                  {savingLimit ? 'Saving…' : 'Save'}
-                </button>
-                <button onClick={() => setShowLimitForm(false)}
-                  className="rounded-xl border border-border px-4 py-2 text-sm text-text-muted hover:text-text-primary transition-colors">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Block form */}
-          {showBlockForm && (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5 space-y-4">
-              <p className="text-sm font-semibold text-red-400">🔒 Block App</p>
-              <AppSelect value={blockAppId} onChange={setBlockAppId} />
-              <div className="flex gap-2">
-                <button onClick={handleSaveBlock} disabled={savingBlock || !blockAppId}
-                  className="flex-1 rounded-xl bg-red-500 py-2 text-sm font-semibold text-text-primary hover:bg-red-400 disabled:opacity-50 transition-colors">
-                  {savingBlock ? 'Saving…' : 'Block App'}
-                </button>
-                <button onClick={() => setShowBlockForm(false)}
-                  className="rounded-xl border border-border px-4 py-2 text-sm text-text-muted hover:text-text-primary transition-colors">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Schedule form */}
           {showScheduleForm && (
@@ -298,7 +217,10 @@ export default function RulesPage() {
                 {timeLimits.map((r) => (
                   <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-border bg-bg-card px-4 py-3">
                     <div className="w-10 h-10 rounded-xl bg-bg-elevated border border-border flex items-center justify-center text-sm font-bold text-violet-400 flex-shrink-0">
-                      {r.installed_apps?.app_name?.charAt(0) ?? '⏱'}
+                      {r.installed_apps?.icon_url
+                        ? <img src={r.installed_apps.icon_url} alt={r.installed_apps.app_name} className="w-7 h-7 rounded-lg object-contain" />
+                        : r.installed_apps?.app_name?.charAt(0) ?? '⏱'
+                      }
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-text-primary truncate">{r.installed_apps?.app_name ?? r.category ?? 'All Apps'}</p>
@@ -326,7 +248,10 @@ export default function RulesPage() {
                 {blockRules.map((r) => (
                   <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3">
                     <div className="w-10 h-10 rounded-xl bg-bg-elevated border border-border flex items-center justify-center text-sm font-bold text-red-400 flex-shrink-0">
-                      {r.installed_apps?.app_name?.charAt(0) ?? '🔒'}
+                      {r.installed_apps?.icon_url
+                        ? <img src={r.installed_apps.icon_url} alt={r.installed_apps.app_name} className="w-7 h-7 rounded-lg object-contain" />
+                        : r.installed_apps?.app_name?.charAt(0) ?? '🔒'
+                      }
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-text-primary truncate">{r.installed_apps?.app_name ?? r.category ?? 'All Apps'}</p>
@@ -364,7 +289,7 @@ export default function RulesPage() {
                     </div>
                     <button onClick={() => handleToggleSchedule(s.id, s.is_active)}
                       className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${s.is_active ? 'bg-accent' : 'bg-slate-600'}`}>
-                      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${s.is_active ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+                      <span className={`absolute left-0 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${s.is_active ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                     </button>
                     <button onClick={() => handleDeleteSchedule(s.id)}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">

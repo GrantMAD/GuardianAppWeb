@@ -23,32 +23,37 @@ export function useFamilyBootstrap() {
 
     (async () => {
       try {
-        let fam = family;
+        let fam = await getFamily();
 
         if (!fam) {
-          fam = await getFamily();
-          if (!fam) {
-            // Auto-create a family for new users who bypassed onboarding
-            const { data: { user } } = await supabase!.auth.getUser();
-            const name = user?.user_metadata?.family_name ?? 'My Family';
-            const { createFamily } = await import('@/lib/child-service');
-            fam = await createFamily(name);
-          }
-          if (fam) setFamily(fam);
+          // Auto-create a family for new users who bypassed onboarding
+          const { data: { user } } = await supabase!.auth.getUser();
+          const name = user?.user_metadata?.family_name ?? 'My Family';
+          const { createFamily } = await import('@/lib/child-service');
+          fam = await createFamily(name);
         }
+        
+        if (fam) setFamily(fam);
 
         if (fam) {
           if (!fam.has_completed_onboarding) {
-            router.replace('/onboarding');
+            if (window.location.pathname !== '/onboarding') {
+              router.replace('/onboarding');
+            }
             return;
           }
 
           const kids = await getChildren(fam.id);
           setChildren(kids);
 
-          // Auto-select first child if none selected
-          if (!selectedChildId && kids.length > 0) {
+          // Validate that the currently selected child actually belongs to this family
+          // (fixes stale cache issues if the database was wiped)
+          const isValidSelection = kids.some(k => k.id === selectedChildId);
+
+          if ((!selectedChildId || !isValidSelection) && kids.length > 0) {
             setSelectedChildId(kids[0].id);
+          } else if (kids.length === 0) {
+            setSelectedChildId(null);
           }
         }
       } catch (err) {

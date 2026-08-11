@@ -104,3 +104,39 @@ export interface NotificationLog {
   sent_at: string;
   target_role: string;
 }
+
+// ─── Rule Payloads ────────────────────────────────────────────────────────────
+
+export interface CreateTimeLimitRulePayload {
+  child_id: string;
+  app_id?: string | null;
+  category?: string | null;
+  daily_limit_minutes: number;
+}
+
+export interface CreateBlockRulePayload {
+  child_id: string;
+  app_id?: string | null;
+  category?: string | null;
+}
+
+// ─── Notification Preferences ─────────────────────────────────────────────────
+
+export interface NotificationPreference {
+  family_id: string;
+  weekly_reports: boolean;
+  permission_requests: boolean;
+  app_installs: boolean;
+  system_alerts: boolean;
+}
+
+// ─── Parent Activity Logs ─────────────────────────────────────────────────────
+
+export interface AuditLogEntry {
+  id: string;
+  family_id: string;
+  action_type: string;
+  description: string;
+  metadata?: any;
+  created_at: string;
+}

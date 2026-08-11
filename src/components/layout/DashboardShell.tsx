@@ -171,7 +171,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       : 'text-text-muted hover:bg-bg-elevated hover:text-text-primary border border-transparent'
                   }`}
                 >
-                  <span className="text-base flex-shrink-0">{item.icon}</span>
+                  <span className="w-6 flex justify-center text-base flex-shrink-0">{item.icon}</span>
                   {!isCollapsed && <span>{item.label}</span>}
                 </Link>
               );
@@ -188,7 +188,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 isCollapsed ? 'p-3 justify-center text-lg' : 'gap-3 px-3 py-2.5 text-sm font-medium'
               }`}
             >
-              <span className="text-base flex-shrink-0">🚪</span>
+              <span className="w-6 flex justify-center text-base flex-shrink-0">🚪</span>
               {!isCollapsed && <span>{signingOut ? 'Signing out…' : 'Sign Out'}</span>}
             </button>
           </div>

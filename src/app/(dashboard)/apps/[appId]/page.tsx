@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useFamilyStore } from '@/store/familyStore';
 import { getDailyUsage, getWeeklyUsage, getInstalledApps } from '@/lib/usage-service';
 import { getRules, createRule, deleteRule } from '@/lib/rule-service';
+import { logParentAction } from '@/lib/parent-service';
 import type { InstalledApp, Rule } from '@/types';
 
 function formatMinutes(mins: number) {
@@ -18,7 +19,7 @@ function formatMinutes(mins: number) {
 export default function AppDetailPage() {
   const { appId } = useParams<{ appId: string }>();
   const router = useRouter();
-  const { selectedChildId } = useFamilyStore();
+  const { selectedChildId, family } = useFamilyStore();
 
   const [appInfo, setAppInfo] = useState<InstalledApp | null>(null);
   const [rules, setRules] = useState<Rule[]>([]);
@@ -26,9 +27,6 @@ export default function AppDetailPage() {
   const [weekData, setWeekData] = useState<{ label: string; minutes: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
-  const [showLimitForm, setShowLimitForm] = useState(false);
-  const [limitMinutes, setLimitMinutes] = useState(60);
-  const [saving, setSaving] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -74,10 +72,16 @@ export default function AppDetailPage() {
         const blockRule = rules.find((r) => r.rule_type === 'BLOCK');
         if (blockRule) {
           await deleteRule(blockRule.id);
+          if (family) {
+            await logParentAction(family.id, 'RULE_REMOVED', `Unblocked app: ${appInfo?.app_name || appId}`);
+          }
           setRules((prev) => prev.filter((r) => r.id !== blockRule.id));
         }
       } else {
         const newRule = await createRule(selectedChildId, 'BLOCK', appId);
+        if (family) {
+          await logParentAction(family.id, 'RULE_CREATED', `Blocked app: ${appInfo?.app_name || appId}`);
+        }
         setRules((prev) => [...prev, newRule]);
       }
     } catch (err) { console.error(err); }
@@ -87,20 +91,12 @@ export default function AppDetailPage() {
   const handleDeleteLimit = async () => {
     if (!timeLimit) return;
     await deleteRule(timeLimit.id);
+    if (family) {
+      await logParentAction(family.id, 'RULE_REMOVED', `Removed time limit for app: ${appInfo?.app_name || appId}`);
+    }
     setRules((prev) => prev.filter((r) => r.id !== timeLimit.id));
   };
 
-  const handleSaveLimit = async () => {
-    if (!selectedChildId) return;
-    setSaving(true);
-    try {
-      if (timeLimit) await deleteRule(timeLimit.id);
-      const newRule = await createRule(selectedChildId, 'TIME_LIMIT', appId, undefined, limitMinutes);
-      setRules((prev) => [...prev.filter((r) => r.rule_type !== 'TIME_LIMIT'), newRule]);
-      setShowLimitForm(false);
-    } catch (err) { console.error(err); }
-    finally { setSaving(false); }
-  };
 
   const maxWeek = Math.max(...weekData.map((d) => d.minutes), 1);
 
@@ -213,12 +209,12 @@ export default function AppDetailPage() {
               <p className="text-sm font-bold text-amber-400 mt-0.5">{formatMinutes(timeLimit.daily_limit_minutes ?? 0)}</p>
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={() => { setLimitMinutes(timeLimit.daily_limit_minutes ?? 60); setShowLimitForm(true); }}
+              <Link
+                href={`/rules/create-limit?appId=${appId}`}
                 className="text-xs text-accent hover:text-accent transition-colors"
               >
                 Edit
-              </button>
+              </Link>
               <button
                 onClick={handleDeleteLimit}
                 className="text-xs text-red-400 hover:text-red-300 transition-colors"
@@ -228,46 +224,12 @@ export default function AppDetailPage() {
             </div>
           </div>
         ) : (
-          <button
-            onClick={() => setShowLimitForm(true)}
-            className="w-full rounded-xl border border-dashed border-border px-4 py-3 text-sm text-text-muted hover:text-text-primary hover:border-text-muted transition-colors"
+          <Link
+            href={`/rules/create-limit?appId=${appId}`}
+            className="flex w-full items-center justify-center rounded-xl border border-dashed border-border px-4 py-3 text-sm text-text-muted hover:text-text-primary hover:border-text-muted transition-colors"
           >
             + Add Time Limit
-          </button>
-        )}
-
-        {/* Limit form */}
-        {showLimitForm && (
-          <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-4">
-            <p className="text-sm font-medium text-accent">Set Daily Limit</p>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                min={15}
-                max={480}
-                step={15}
-                value={limitMinutes}
-                onChange={(e) => setLimitMinutes(Number(e.target.value))}
-                className="flex-1 accent-accent"
-              />
-              <span className="text-sm font-bold text-text-primary w-14 text-right">{formatMinutes(limitMinutes)}</span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleSaveLimit}
-                disabled={saving}
-                className="flex-1 rounded-xl bg-accent py-2 text-sm font-semibold text-bg-primary hover:bg-accent transition-colors disabled:opacity-50"
-              >
-                {saving ? 'Saving…' : 'Save Limit'}
-              </button>
-              <button
-                onClick={() => setShowLimitForm(false)}
-                className="rounded-xl border border-border px-4 py-2 text-sm text-text-muted hover:text-text-primary transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+          </Link>
         )}
       </div>
     </div>

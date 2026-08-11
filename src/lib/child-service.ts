@@ -129,3 +129,14 @@ export async function updateFamilyTheme(familyId: string, theme: 'light' | 'dark
     
   if (error) throw error;
 }
+
+export async function completeFamilyOnboarding(familyId: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase not configured');
+  
+  const { error } = await supabase
+    .from('families')
+    .update({ has_completed_onboarding: true })
+    .eq('id', familyId);
+    
+  if (error) throw error;
+}

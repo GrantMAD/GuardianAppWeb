@@ -1,0 +1,118 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useFamilyStore } from '@/store/familyStore';
+import { getInstalledApps } from '@/lib/usage-service';
+import { createBlockRule, logParentAction } from '@/lib/parent-service';
+import type { InstalledApp } from '@/types';
+import Link from 'next/link';
+
+export default function CreateBlockPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { children, selectedChildId, setSelectedChildId, family } = useFamilyStore();
+  
+  const [apps, setApps] = useState<InstalledApp[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [appId, setAppId] = useState(searchParams.get('appId') || '');
+
+  useEffect(() => {
+    if (!selectedChildId) return;
+    setLoading(true);
+    getInstalledApps(selectedChildId)
+      .then((a) => setApps((a ?? []) as InstalledApp[]))
+      .finally(() => setLoading(false));
+  }, [selectedChildId]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedChildId || !appId) return;
+    
+    setSaving(true);
+    try {
+      await createBlockRule({
+        child_id: selectedChildId,
+        app_id: appId,
+      });
+      if (family) {
+        await logParentAction(
+          family.id,
+          'RULE_CREATED',
+          `Created a block rule`
+        );
+      }
+      router.push('/rules');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save block rule');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <Link href="/rules" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors">
+        ← Back to Rules
+      </Link>
+
+      <div>
+        <h1 className="text-3xl font-bold text-text-primary">🔒 Block App</h1>
+        <p className="mt-1 text-text-muted text-sm">Prevent a specific app from being opened by your child.</p>
+      </div>
+
+      <form onSubmit={handleSave} className="space-y-6 rounded-3xl border border-border bg-bg-card p-6 md:p-8">
+        
+        {/* Child Selection */}
+        <div>
+          <label className="block text-sm font-semibold text-text-primary mb-2">Apply to</label>
+          <select
+            value={selectedChildId || ''}
+            onChange={(e) => setSelectedChildId(e.target.value)}
+            className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3 text-text-primary outline-none focus:border-red-500/50"
+            required
+          >
+            <option value="" disabled>Select a child…</option>
+            {children.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* App Selection */}
+        <div>
+          <label className="block text-sm font-semibold text-text-primary mb-2">Select App to Block</label>
+          <select
+            value={appId}
+            onChange={(e) => setAppId(e.target.value)}
+            className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3 text-text-primary outline-none focus:border-red-500/50"
+            required
+            disabled={loading}
+          >
+            <option value="" disabled>{loading ? 'Loading apps...' : 'Select an app…'}</option>
+            {apps.map(a => (
+              <option key={a.id} value={a.id}>{a.app_name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="pt-4 flex gap-3">
+          <Link href="/rules" className="flex-1 text-center rounded-xl border border-border px-4 py-3 font-semibold text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors">
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            disabled={saving || !appId || !selectedChildId}
+            className="flex-[2] rounded-xl bg-red-500 py-3 font-semibold text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+          >
+            {saving ? 'Saving…' : 'Block App'}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  );
+}

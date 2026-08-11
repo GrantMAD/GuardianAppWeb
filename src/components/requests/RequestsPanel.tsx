@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { updatePermissionRequestStatus } from '@/lib/dashboard-service';
+import { useFamilyStore } from '@/store/familyStore';
+import { logParentAction } from '@/lib/parent-service';
 
 interface RequestItem {
   id: string;
@@ -17,6 +19,7 @@ interface RequestsPanelProps {
 
 export function RequestsPanel({ requests }: RequestsPanelProps) {
   const router = useRouter();
+  const { family } = useFamilyStore();
   const [visibleRequests, setVisibleRequests] = useState(requests);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +34,9 @@ export function RequestsPanel({ requests }: RequestsPanelProps) {
 
     try {
       await updatePermissionRequestStatus(requestId, nextStatus);
+      if (family) {
+        await logParentAction(family.id, 'REQUEST_' + nextStatus.toUpperCase(), `Permission request ${nextStatus}`);
+      }
       setVisibleRequests((current) => current.filter((request) => request.id !== requestId));
       router.refresh();
     } catch {

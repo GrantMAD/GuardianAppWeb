@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { createFamily, addChild } from '@/lib/child-service';
+import { createFamily, addChild, getFamily } from '@/lib/child-service';
 import { useFamilyStore } from '@/store/familyStore';
 
 export default function OnboardingPage() {
@@ -32,15 +32,27 @@ export default function OnboardingPage() {
     setLoading(true);
     setError('');
     try {
-      const fam = await createFamily(familyName.trim());
-      // After creating, we mark onboarding as completed locally first, 
-      // but actually the DB trigger usually handles this, or we just trust the return.
-      // Wait, in `createFamily` it returns the family.
-      // But onboarding means we should update `has_completed_onboarding = true`.
-      // Let's do that.
-      await supabase!.from('families').update({ has_completed_onboarding: true }).eq('id', fam.id);
+      let fam = await getFamily();
       
-      setFamily({ ...fam, has_completed_onboarding: true });
+      if (fam) {
+        // Update existing family's name instead of creating a new one
+        const { data, error } = await supabase!
+          .from('families')
+          .update({ name: familyName.trim() })
+          .eq('id', fam.id)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        fam = data as any;
+      } else {
+        // Create new family
+        fam = await createFamily(familyName.trim());
+      }
+
+      await supabase!.from('families').update({ has_completed_onboarding: true }).eq('id', fam!.id);
+      
+      setFamily({ ...fam!, has_completed_onboarding: true });
       setStep(2);
     } catch (err: any) {
       setError(err.message || 'Failed to setup family');

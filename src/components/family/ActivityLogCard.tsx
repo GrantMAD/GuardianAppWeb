@@ -1,24 +1,44 @@
 'use client';
 
-const entries = [
-  { title: 'Blocked YouTube', detail: 'Applied at 8:30 PM' },
-  { title: 'Approved extra time', detail: 'For Minecraft — 20 minutes' },
-  { title: 'Saved bedtime schedule', detail: 'Applied to both children' },
-];
+import { useEffect, useState } from 'react';
+import { useFamilyStore } from '@/store/familyStore';
+import { getParentActivityLogs } from '@/lib/parent-service';
+import type { AuditLogEntry } from '@/types';
 
 export function ActivityLogCard() {
+  const { family } = useFamilyStore();
+  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!family) return;
+    setLoading(true);
+    getParentActivityLogs(family.id)
+      .then(setLogs)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [family]);
+
   return (
     <div className="rounded-2xl border border-border bg-bg-card p-6">
       <h2 className="text-lg font-semibold">Parent activity log</h2>
       <p className="mt-2 text-sm text-text-muted">Recent actions taken from the parent dashboard.</p>
 
       <div className="mt-4 space-y-3">
-        {entries.map((entry) => (
-          <div key={entry.title} className="rounded-xl border border-border bg-bg-elevated/60 p-3">
-            <p className="font-medium">{entry.title}</p>
-            <p className="mt-1 text-sm text-text-muted">{entry.detail}</p>
-          </div>
-        ))}
+        {loading ? (
+          <p className="text-sm text-text-muted py-4 text-center border border-dashed border-border rounded-xl">Loading logs...</p>
+        ) : logs.length === 0 ? (
+          <p className="text-sm text-text-muted py-4 text-center border border-dashed border-border rounded-xl">No recent activity.</p>
+        ) : (
+          logs.map((entry) => (
+            <div key={entry.id} className="rounded-xl border border-border bg-bg-elevated/60 p-3">
+              <p className="font-medium text-sm text-text-primary">{entry.description}</p>
+              <p className="mt-1 text-[11px] text-text-muted uppercase tracking-wider">
+                {new Date(entry.created_at).toLocaleString()}
+              </p>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

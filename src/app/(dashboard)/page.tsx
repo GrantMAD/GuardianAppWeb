@@ -232,9 +232,15 @@ export default function DashboardPage() {
                       <li key={log.id} className="flex items-center justify-between gap-3 rounded-xl bg-bg-elevated/70 px-3 py-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <div
-                            className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: color }}
-                          />
+                            className="w-6 h-6 rounded flex-shrink-0 flex items-center justify-center overflow-hidden"
+                            style={{ backgroundColor: color + '22' }}
+                          >
+                            {log.installed_apps?.icon_url ? (
+                              <img src={log.installed_apps.icon_url} alt={name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-[10px] font-bold" style={{ color }}>{name.charAt(0)}</span>
+                            )}
+                          </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-text-primary truncate">{name}</p>
                             <p className="text-[10px] text-text-muted capitalize">{cat}</p>

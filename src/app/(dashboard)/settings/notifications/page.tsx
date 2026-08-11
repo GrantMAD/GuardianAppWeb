@@ -1,29 +1,65 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useFamilyStore } from '@/store/familyStore';
+import { getNotificationPreferences, updateNotificationPreferences } from '@/lib/parent-service';
 
 interface NotifSetting {
-  key: string;
+  key: keyof Omit<import('@/types').NotificationPreference, 'id' | 'family_id' | 'created_at' | 'updated_at'>;
   label: string;
   description: string;
-  enabled: boolean;
 }
 
-export default function NotificationSettingsPage() {
-  const [settings, setSettings] = useState<NotifSetting[]>([
-    { key: 'daily_report',    label: 'Daily Report',       description: 'Morning summary of yesterday\'s usage', enabled: true  },
-    { key: 'weekly_report',   label: 'Weekly Report',      description: 'Sunday evening weekly recap',           enabled: true  },
-    { key: 'limit_warning',   label: 'Limit Warning',      description: 'When child is 10 min from their limit', enabled: true  },
-    { key: 'threshold_alert', label: 'Threshold Alert',    description: 'When child hits 80% of daily limit',    enabled: true  },
-    { key: 'late_night',      label: 'Late Night Alert',   description: 'Active usage detected past bedtime',    enabled: true  },
-    { key: 'requests',        label: 'Permission Requests','description': 'When child asks for more time',       enabled: true  },
-  ]);
+const SETTING_DEFS: NotifSetting[] = [
+  { key: 'weekly_reports', label: 'Weekly Reports', description: 'Sunday evening weekly usage recap' },
+  { key: 'permission_requests', label: 'Permission Requests', description: 'When a child asks for more time or app unblock' },
+  { key: 'app_installs', label: 'App Installs', description: 'When a child installs a new app on their device' },
+  { key: 'system_alerts', label: 'System Alerts', description: 'Important system updates and limit warnings' },
+];
 
-  const toggle = (key: string) => {
-    setSettings((prev) =>
-      prev.map((s) => s.key === key ? { ...s, enabled: !s.enabled } : s)
-    );
+export default function NotificationSettingsPage() {
+  const { family } = useFamilyStore();
+  const [preferences, setPreferences] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!family) return;
+    setLoading(true);
+    getNotificationPreferences(family.id)
+      .then((prefs) => {
+        if (prefs) {
+          setPreferences(prefs as any);
+        } else {
+          // Defaults if no prefs found
+          const defaults: Record<string, boolean> = {};
+          SETTING_DEFS.forEach(s => defaults[s.key] = true);
+          setPreferences(defaults);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [family]);
+
+  const toggle = async (key: string) => {
+    if (!family || saving) return;
+    setSaving(key);
+    const newValue = !preferences[key];
+    
+    // Optimistic update
+    setPreferences(prev => ({ ...prev, [key]: newValue }));
+    
+    try {
+      await updateNotificationPreferences(family.id, { [key]: newValue });
+    } catch (err) {
+      console.error(err);
+      // Revert on error
+      setPreferences(prev => ({ ...prev, [key]: !newValue }));
+      alert('Failed to save preference');
+    } finally {
+      setSaving(null);
+    }
   };
 
   return (
@@ -38,8 +74,14 @@ export default function NotificationSettingsPage() {
         <p className="mt-1 text-text-muted text-sm">Choose which email alerts and dashboard notifications you want to receive.</p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-bg-card divide-y divide-slate-800/60 overflow-hidden">
-        {settings.map((s) => (
+      <div className="rounded-2xl border border-border bg-bg-card divide-y divide-slate-800/60 overflow-hidden relative">
+        {loading && (
+          <div className="absolute inset-0 bg-bg-card/50 backdrop-blur-sm z-10 flex items-center justify-center">
+             <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin" />
+          </div>
+        )}
+        
+        {SETTING_DEFS.map((s) => (
           <div key={s.key} className="flex items-center justify-between p-5 hover:bg-bg-elevated/30 transition-colors">
             <div className="pr-4">
               <p className="text-sm font-semibold text-text-primary">{s.label}</p>
@@ -49,13 +91,14 @@ export default function NotificationSettingsPage() {
             {/* Custom Toggle Switch */}
             <button
               onClick={() => toggle(s.key)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                s.enabled ? 'bg-accent' : 'bg-bg-elevated'
+              disabled={saving === s.key}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none disabled:opacity-50 ${
+                preferences[s.key] !== false ? 'bg-accent' : 'bg-bg-elevated'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  s.enabled ? 'translate-x-6' : 'translate-x-1'
+                  preferences[s.key] !== false ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
