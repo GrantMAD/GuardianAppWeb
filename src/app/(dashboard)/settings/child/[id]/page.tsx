@@ -97,13 +97,38 @@ export default function ChildDetailPage() {
           <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider">📱 Device Status</h2>
           
           {child.device_id ? (
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-xl">✅</div>
-              <div>
-                <p className="text-sm font-bold text-emerald-400">Device Linked</p>
-                <p className="text-xs text-text-muted mt-1">{child.device_name ?? 'Unknown Device'} • {child.os_type ?? 'Android'}</p>
-                {child.last_seen_at && (
-                  <p className="text-xs text-text-muted mt-0.5">Last seen: {new Date(child.last_seen_at).toLocaleString()}</p>
+            <div className="space-y-3">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-xl">✅</div>
+                <div>
+                  <p className="text-sm font-bold text-emerald-400">Device Linked</p>
+                  <p className="text-xs text-text-muted mt-1">{child.device_name ?? 'Unknown Device'} • {child.os_type ?? 'Android'}</p>
+                  {child.last_seen_at && (
+                    <p className="text-xs text-text-muted mt-0.5">Last seen: {new Date(child.last_seen_at).toLocaleString()}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Re-pair section */}
+              <div className="rounded-xl border border-border bg-bg-elevated/50 p-4">
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">📲 Re-pair Device</p>
+                <p className="text-xs text-text-muted mb-3">
+                  Need to set up the child app again? Generate a new pairing code below.
+                </p>
+                {pairingCode ? (
+                  <div className="bg-bg-card border border-border rounded-xl p-4 text-center">
+                    <p className="text-xs text-text-muted mb-1 uppercase tracking-widest font-semibold">Pairing Code</p>
+                    <p className="text-3xl font-mono font-bold tracking-widest text-text-primary mb-1">{pairingCode}</p>
+                    <p className="text-xs text-amber-400">Enter this on the child's device · Expires in 24 hours</p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleGenerateCode}
+                    disabled={generating}
+                    className="rounded-xl border border-accent/40 bg-accent/10 py-2 px-5 text-sm font-semibold text-accent hover:bg-accent/20 transition-colors disabled:opacity-50"
+                  >
+                    {generating ? 'Generating…' : '🔁 Generate New Code'}
+                  </button>
                 )}
               </div>
             </div>
