@@ -6,6 +6,7 @@ import { useFamilyStore } from '@/store/familyStore';
 import { getDailyUsage, getDailyScreenTimeSummary } from '@/lib/usage-service';
 import { getPendingRequests, updateRequestStatus } from '@/lib/notification-service';
 import { createSchedule } from '@/lib/schedule-service';
+import { supabase } from '@/lib/supabase';
 import type { UsageLog, PermissionRequest } from '@/types';
 
 function formatMinutes(mins: number) {
@@ -77,13 +78,30 @@ export default function DashboardPage() {
   }, [selectedChildId]);
 
   useEffect(() => {
-    if (!family) return;
+    if (!family || !children.length) return;
+    
+    // Fetch pending requests for all children
     getPendingRequests(family.id).then(setRequests).catch(console.error);
-  }, [family]);
+  }, [family, children]);
 
   const handleApprove = async (id: string) => {
+    const req = requests.find((r) => r.id === id);
     const mins = approveMins[id] || 15;
-    await updateRequestStatus(id, 'approved', mins);
+
+    await updateRequestStatus(id, 'approved', req?.request_type === 'unblock' ? null : mins);
+
+    // For unblock requests: delete the matching BLOCK rule
+    if (req?.request_type === 'unblock' && req.app_id && req.child_id && supabase) {
+      const { error } = await supabase
+        .from('rules')
+        .delete()
+        .eq('child_id', req.child_id)
+        .eq('app_id', req.app_id)
+        .eq('rule_type', 'BLOCK');
+
+      if (error) console.error('Failed to delete block rule:', error);
+    }
+
     setRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
@@ -158,7 +176,7 @@ export default function DashboardPage() {
       </div>
 
       {/* No child selected state */}
-      {!selectedChildId && !loading && (
+      {!selectedChildId && !loading && children.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border bg-bg-card/60 p-10 text-center">
           <p className="text-3xl mb-3">👶</p>
           <p className="text-text-primary font-semibold mb-1">No child selected</p>
@@ -198,10 +216,16 @@ export default function DashboardPage() {
               {requests.map((req) => (
                 <div key={req.id} className="flex items-center justify-between gap-4 rounded-xl bg-bg-card border border-border px-4 py-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-text-primary text-sm truncate">
-                      {req.children?.name ?? 'Child'} — {req.installed_apps?.app_name ?? 'App'}
-                    </p>
-                    <p className="text-xs text-text-muted truncate">{req.message ?? 'Requested extra time'}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                        style={req.request_type === 'unblock' ? {backgroundColor:'rgba(239,68,68,0.1)', color:'#f87171'} : {backgroundColor:'rgba(124,106,245,0.1)', color:'#9B8FF7'}}>
+                        {req.request_type === 'unblock' ? '🔓 Unblock' : '⏱ Extra Time'}
+                      </span>
+                      <p className="font-medium text-text-primary text-sm truncate">
+                        {req.children?.name ?? 'Child'} — {req.installed_apps?.app_name ?? 'App'}
+                      </p>
+                    </div>
+                    <p className="text-xs text-text-muted truncate mt-1">{req.message ?? (req.request_type === 'unblock' ? 'Requesting unblock' : 'Requested extra time')}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {req.request_type === 'extra_time' && (

@@ -5,7 +5,15 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useFamilyStore } from '@/store/familyStore';
 import { useFamilyBootstrap } from '@/hooks/useFamilyBootstrap';
 import { signOut } from '@/lib/auth-service';
-import { useState } from 'react';
+import { getDailyScreenTimeSummary } from '@/lib/usage-service';
+import { useState, useEffect } from 'react';
+
+function formatMinsShort(mins: number) {
+  if (mins < 60) return `${mins}m`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
 
 const navItems = [
   { href: '/',              label: 'Overview',      icon: '🏠' },
@@ -25,6 +33,24 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [signingOut, setSigningOut] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [familySummaries, setFamilySummaries] = useState<Record<string, number>>({});
+
+  const todayDate = new Date().toISOString().slice(0, 10);
+
+  useEffect(() => {
+    if (!kids.length) return;
+    Promise.all(
+      kids.map(c =>
+        getDailyScreenTimeSummary(c.id, todayDate)
+          .then(res => ({ id: c.id, mins: res?.total_minutes ?? 0 }))
+          .catch(() => ({ id: c.id, mins: 0 }))
+      )
+    ).then(results => {
+      const sums: Record<string, number> = {};
+      results.forEach(r => { sums[r.id] = r.mins; });
+      setFamilySummaries(sums);
+    });
+  }, [kids, todayDate]);
 
   // Bootstrap family data on first render
   useFamilyBootstrap();
@@ -127,10 +153,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                       </div>
                       {!isCollapsed && (
                         <>
-                          <span className="font-medium truncate">{child.name}</span>
-                          {isSelected && (
-                            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
-                          )}
+                          <div className="min-w-0 flex-1">
+                            <span className="font-medium truncate block">{child.name}</span>
+                            <span className={`text-[11px] tabular-nums ${
+                              isSelected ? 'text-accent/70' : 'text-text-muted'
+                            }`}>
+                              {familySummaries[child.id] !== undefined
+                                ? `${formatMinsShort(familySummaries[child.id])} today`
+                                : '—'}
+                            </span>
+                          </div>
+                          <span className={`ml-auto w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
                         </>
                       )}
                     </button>
