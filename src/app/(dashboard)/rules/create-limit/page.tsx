@@ -8,6 +8,17 @@ import { createTimeLimitRule, logParentAction } from '@/lib/parent-service';
 import type { InstalledApp } from '@/types';
 import Link from 'next/link';
 
+const CATEGORIES = [
+  { value: 'social', label: 'Social Media' },
+  { value: 'games', label: 'Games' },
+  { value: 'education', label: 'Education' },
+  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'productivity', label: 'Productivity' },
+  { value: 'communication', label: 'Communication' },
+  { value: 'utilities', label: 'Utilities' },
+  { value: 'other', label: 'Other' },
+];
+
 function formatMinutes(mins: number) {
   if (mins < 60) return `${mins}m`;
   const h = Math.floor(mins / 60);
@@ -24,7 +35,9 @@ export default function CreateLimitPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [targetType, setTargetType] = useState<'app' | 'category'>('app');
   const [appId, setAppId] = useState(searchParams.get('appId') || '');
+  const [categoryId, setCategoryId] = useState('');
   const [limitMinutes, setLimitMinutes] = useState(60);
 
   useEffect(() => {
@@ -37,13 +50,14 @@ export default function CreateLimitPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedChildId || !appId) return;
+    if (!selectedChildId || (targetType === 'app' && !appId) || (targetType === 'category' && !categoryId)) return;
     
     setSaving(true);
     try {
       await createTimeLimitRule({
         child_id: selectedChildId,
-        app_id: appId,
+        app_id: targetType === 'app' ? appId : undefined,
+        category: targetType === 'category' ? categoryId : undefined,
         daily_limit_minutes: limitMinutes,
       });
       if (family) {
@@ -91,22 +105,57 @@ export default function CreateLimitPage() {
           </select>
         </div>
 
-        {/* App Selection */}
-        <div>
-          <label className="block text-sm font-semibold text-text-primary mb-2">Select App</label>
-          <select
-            value={appId}
-            onChange={(e) => setAppId(e.target.value)}
-            className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3 text-text-primary outline-none focus:border-accent"
-            required
-            disabled={loading}
+        {/* Target Type Selection */}
+        <div className="flex bg-bg-elevated p-1 rounded-xl border border-border w-full max-w-sm">
+          <button
+            type="button"
+            onClick={() => setTargetType('app')}
+            className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${targetType === 'app' ? 'bg-bg-card text-text-primary shadow-sm border border-border/50' : 'text-text-muted hover:text-text-primary'}`}
           >
-            <option value="" disabled>{loading ? 'Loading apps...' : 'Select an app…'}</option>
-            {apps.map(a => (
-              <option key={a.id} value={a.id}>{a.app_name}</option>
-            ))}
-          </select>
+            Specific App
+          </button>
+          <button
+            type="button"
+            onClick={() => setTargetType('category')}
+            className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${targetType === 'category' ? 'bg-bg-card text-text-primary shadow-sm border border-border/50' : 'text-text-muted hover:text-text-primary'}`}
+          >
+            App Category
+          </button>
         </div>
+
+        {/* Selection */}
+        {targetType === 'app' ? (
+          <div>
+            <label className="block text-sm font-semibold text-text-primary mb-2">Select App</label>
+            <select
+              value={appId}
+              onChange={(e) => setAppId(e.target.value)}
+              className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3 text-text-primary outline-none focus:border-accent"
+              required={targetType === 'app'}
+              disabled={loading}
+            >
+              <option value="" disabled>{loading ? 'Loading apps...' : 'Select an app…'}</option>
+              {apps.map(a => (
+                <option key={a.id} value={a.id}>{a.app_name}</option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div>
+            <label className="block text-sm font-semibold text-text-primary mb-2">Select Category</label>
+            <select
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3 text-text-primary outline-none focus:border-accent"
+              required={targetType === 'category'}
+            >
+              <option value="" disabled>Select a category…</option>
+              {CATEGORIES.map(c => (
+                <option key={c.value} value={c.value}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Limit Slider */}
         <div>
@@ -133,7 +182,7 @@ export default function CreateLimitPage() {
           </Link>
           <button
             type="submit"
-            disabled={saving || !appId || !selectedChildId}
+            disabled={saving || (targetType === 'app' ? !appId : !categoryId) || !selectedChildId}
             className="flex-[2] rounded-xl bg-violet-500 py-3 font-semibold text-white hover:bg-violet-600 transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Create Time Limit'}

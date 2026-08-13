@@ -25,15 +25,16 @@ export default function ReportsPage() {
   const [weekData, setWeekData] = useState<DayData[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedDates, setExpandedDates] = useState<string[]>([]);
+  const [daysRange, setDaysRange] = useState<7 | 30>(7);
 
   useEffect(() => {
     if (!selectedChildId) return;
     setLoading(true);
-    getWeeklyUsage(selectedChildId, 7)
+    getWeeklyUsage(selectedChildId, daysRange)
       .then(setWeekData)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [selectedChildId]);
+  }, [selectedChildId, daysRange]);
 
   const toggleDate = (date: string) => {
     setExpandedDates((prev) =>
@@ -69,14 +70,30 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium">Analytics</p>
-        <h1 className="text-3xl font-bold text-text-primary mt-1">📈 Reports</h1>
-        {selectedChild && (
-          <p className="mt-1 text-text-muted text-sm">
-            Screen time breakdown for {selectedChild.name} — last 7 days.
-          </p>
-        )}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-accent font-medium">Analytics</p>
+          <h1 className="text-3xl font-bold text-text-primary mt-1">📈 Reports</h1>
+          {selectedChild && (
+            <p className="mt-1 text-text-muted text-sm">
+              Screen time breakdown for {selectedChild.name} — last {daysRange} days.
+            </p>
+          )}
+        </div>
+        <div className="flex bg-bg-elevated p-1 rounded-xl border border-border">
+          <button
+            onClick={() => setDaysRange(7)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${daysRange === 7 ? 'bg-bg-card text-text-primary shadow-sm border border-border/50' : 'text-text-muted hover:text-text-primary'}`}
+          >
+            7 Days
+          </button>
+          <button
+            onClick={() => setDaysRange(30)}
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${daysRange === 30 ? 'bg-bg-card text-text-primary shadow-sm border border-border/50' : 'text-text-muted hover:text-text-primary'}`}
+          >
+            30 Days
+          </button>
+        </div>
       </div>
 
       {!selectedChildId ? (

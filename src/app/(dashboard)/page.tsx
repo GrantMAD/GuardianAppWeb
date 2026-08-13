@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useFamilyStore } from '@/store/familyStore';
 import { getDailyUsage, getDailyScreenTimeSummary } from '@/lib/usage-service';
 import { getPendingRequests, updateRequestStatus } from '@/lib/notification-service';
+import { createSchedule } from '@/lib/schedule-service';
 import type { UsageLog, PermissionRequest } from '@/types';
 
 function formatMinutes(mins: number) {
@@ -34,6 +35,11 @@ export default function DashboardPage() {
   const [weeklyData, setWeeklyData] = useState<{ day: string; minutes: number }[]>([]);
   const [requests, setRequests] = useState<PermissionRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [approveMins, setApproveMins] = useState<Record<string, number>>({});
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  
+  const [pauseModalOpen, setPauseModalOpen] = useState(false);
+  const [pauseDuration, setPauseDuration] = useState(60);
 
   useEffect(() => {
     if (!selectedChildId) return;
@@ -76,7 +82,8 @@ export default function DashboardPage() {
   }, [family]);
 
   const handleApprove = async (id: string) => {
-    await updateRequestStatus(id, 'approved', null);
+    const mins = approveMins[id] || 15;
+    await updateRequestStatus(id, 'approved', mins);
     setRequests((prev) => prev.filter((r) => r.id !== id));
   };
 
@@ -87,6 +94,35 @@ export default function DashboardPage() {
 
   const topApps = usageData.slice(0, 5);
   const maxWeekly = Math.max(...weeklyData.map((d) => d.minutes), 1);
+
+  const handlePauseDevice = async () => {
+    if (!selectedChildId) return;
+    try {
+      const now = new Date();
+      const end = new Date(now.getTime() + pauseDuration * 60000);
+      
+      const startStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      const endStr = `${end.getHours().toString().padStart(2, '0')}:${end.getMinutes().toString().padStart(2, '0')}`;
+      
+      await createSchedule({
+        child_id: selectedChildId,
+        name: 'Emergency Pause',
+        start_time: startStr,
+        end_time: endStr,
+        days_of_week: [now.getDay()],
+        scope: 'all',
+        block_type: 'block',
+        is_active: true
+      });
+      setPauseModalOpen(false);
+      setToastMsg(`Device paused for ${pauseDuration} minutes.`);
+      setTimeout(() => setToastMsg(null), 3000);
+    } catch (e) {
+      console.error(e);
+      setToastMsg('Failed to pause device');
+      setTimeout(() => setToastMsg(null), 3000);
+    }
+  };
 
   const usageSummary = [
     {
@@ -168,6 +204,17 @@ export default function DashboardPage() {
                     <p className="text-xs text-text-muted truncate">{req.message ?? 'Requested extra time'}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {req.request_type === 'extra_time' && (
+                      <select
+                        value={approveMins[req.id] || 15}
+                        onChange={(e) => setApproveMins({ ...approveMins, [req.id]: Number(e.target.value) })}
+                        className="rounded-lg bg-bg-elevated border border-border px-2 py-1.5 text-xs text-text-primary outline-none"
+                      >
+                        <option value={15}>+15m</option>
+                        <option value={30}>+30m</option>
+                        <option value={60}>+1h</option>
+                      </select>
+                    )}
                     <button
                       onClick={() => handleApprove(req.id)}
                       className="rounded-lg bg-emerald-500/15 border border-emerald-500/30 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/25 transition-colors"
@@ -260,7 +307,7 @@ export default function DashboardPage() {
           {/* Quick actions */}
           <div>
             <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
               {[
                 { href: '/apps', icon: '📱', label: 'View Apps' },
                 { href: '/rules', icon: '⏱️', label: 'Add Limit' },
@@ -276,9 +323,65 @@ export default function DashboardPage() {
                   <span className="text-xs font-medium text-text-primary group-hover:text-text-primary transition-colors">{action.label}</span>
                 </Link>
               ))}
+              <button
+                onClick={() => setPauseModalOpen(true)}
+                className="rounded-2xl border border-danger/40 bg-danger/10 p-4 flex flex-col items-center gap-2 hover:border-danger hover:bg-danger/20 transition-all group"
+              >
+                <span className="text-2xl group-hover:scale-110 transition-transform">🛑</span>
+                <span className="text-xs font-medium text-danger group-hover:text-danger transition-colors">Pause Device</span>
+              </button>
             </div>
           </div>
         </>
+      )}
+
+      {/* Pause Modal */}
+      {pauseModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-border bg-bg-card p-6 shadow-2xl">
+            <h2 className="text-xl font-bold text-text-primary mb-2">🛑 Pause Device</h2>
+            <p className="text-sm text-text-muted mb-6">
+              Instantly block all apps for a set duration. This creates a temporary schedule.
+            </p>
+            <div className="space-y-4 mb-6">
+              <label className="block">
+                <span className="text-sm font-semibold text-text-primary mb-2 block">Duration</span>
+                <select
+                  value={pauseDuration}
+                  onChange={(e) => setPauseDuration(Number(e.target.value))}
+                  className="w-full rounded-xl border border-border bg-bg-elevated px-4 py-3 text-text-primary outline-none focus:border-accent"
+                >
+                  <option value={15}>15 Minutes</option>
+                  <option value={30}>30 Minutes</option>
+                  <option value={60}>1 Hour</option>
+                  <option value={90}>1.5 Hours</option>
+                  <option value={120}>2 Hours</option>
+                </select>
+              </label>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPauseModalOpen(false)}
+                className="flex-1 rounded-xl border border-border bg-bg-elevated py-3 font-semibold text-text-muted hover:text-text-primary transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePauseDevice}
+                className="flex-1 rounded-xl bg-danger py-3 font-semibold text-white hover:bg-red-600 transition-colors"
+              >
+                Pause Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-emerald-400 font-semibold shadow-lg backdrop-blur-md animate-in fade-in slide-in-from-bottom-5">
+          {toastMsg}
+        </div>
       )}
     </div>
   );
