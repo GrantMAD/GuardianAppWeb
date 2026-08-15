@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation';
 import { useFamilyStore } from '@/store/familyStore';
 import { addChild, generatePairingCode } from '@/lib/child-service';
 import { logParentAction } from '@/lib/parent-service';
+import { useToast } from '@/hooks/useToast';
 
 export default function AddChildPage() {
   const router = useRouter();
   const { family, children, setChildren, setSelectedChildId } = useFamilyStore();
+  const { toast } = useToast();
   
   const [name, setName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -33,8 +35,7 @@ export default function AddChildPage() {
       
       setPairingCode(code);
     } catch (err) {
-      console.error(err);
-      alert('Failed to add child.');
+      toast.error('Failed to add child');
     } finally {
       setSaving(false);
     }

@@ -7,6 +7,7 @@ import { getInstalledApps } from '@/lib/usage-service';
 import { getRules } from '@/lib/rule-service';
 import type { InstalledApp, Rule } from '@/types';
 import { CATEGORY_COLORS } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
@@ -24,6 +25,7 @@ type RuleStatus = 'blocked' | 'limited' | 'none';
 export default function AppsPage() {
   const { selectedChildId, children } = useFamilyStore();
   const selectedChild = children.find((c) => c.id === selectedChildId);
+  const { toast } = useToast();
 
   const [apps, setApps] = useState<InstalledApp[]>([]);
   const [rules, setRules] = useState<Rule[]>([]);
@@ -39,7 +41,7 @@ export default function AppsPage() {
         setApps((installedApps ?? []) as InstalledApp[]);
         setRules(appRules);
       })
-      .catch(console.error)
+      .catch(() => toast.error('Failed to load apps'))
       .finally(() => setLoading(false));
   }, [selectedChildId]);
 

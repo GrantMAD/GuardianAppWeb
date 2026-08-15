@@ -9,12 +9,14 @@ import { createSchedule } from '@/lib/schedule-service';
 import { supabase } from '@/lib/supabase';
 import type { UsageLog, PermissionRequest } from '@/types';
 import { formatMinutes, CATEGORY_COLORS } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 
 
 export default function DashboardPage() {
   const { family, children, selectedChildId } = useFamilyStore();
   const selectedChild = children.find((c) => c.id === selectedChildId);
+  const { toast } = useToast();
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -24,7 +26,6 @@ export default function DashboardPage() {
   const [requests, setRequests] = useState<PermissionRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [approveMins, setApproveMins] = useState<Record<string, number>>({});
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
   
   const [pauseModalOpen, setPauseModalOpen] = useState(false);
   const [pauseDuration, setPauseDuration] = useState(60);
@@ -55,7 +56,7 @@ export default function DashboardPage() {
         }
         if (!cancelled) setWeeklyData(days);
       } catch (err) {
-        console.error(err);
+        toast.error('Failed to load dashboard', 'Pull down to retry');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -68,7 +69,9 @@ export default function DashboardPage() {
     if (!family || !children.length) return;
     
     // Fetch pending requests for all children
-    getPendingRequests(family.id).then(setRequests).catch(console.error);
+    getPendingRequests(family.id).then(setRequests).catch(() =>
+      toast.error('Failed to load requests')
+    );
   }, [family, children]);
 
   const handleApprove = async (id: string) => {
@@ -86,7 +89,7 @@ export default function DashboardPage() {
         .eq('app_id', req.app_id)
         .eq('rule_type', 'BLOCK');
 
-      if (error) console.error('Failed to delete block rule:', error);
+      if (error) toast.error('Failed to delete block rule');
     }
 
     setRequests((prev) => prev.filter((r) => r.id !== id));
@@ -120,12 +123,9 @@ export default function DashboardPage() {
         is_active: true
       });
       setPauseModalOpen(false);
-      setToastMsg(`Device paused for ${pauseDuration} minutes.`);
-      setTimeout(() => setToastMsg(null), 3000);
+      toast.success(`Device paused for ${pauseDuration} minutes.`);
     } catch (e) {
-      console.error(e);
-      setToastMsg('Failed to pause device');
-      setTimeout(() => setToastMsg(null), 3000);
+      toast.error('Failed to pause device');
     }
   };
 
@@ -388,12 +388,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Toast Notification */}
-      {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-emerald-400 font-semibold shadow-lg backdrop-blur-md animate-in fade-in slide-in-from-bottom-5">
-          {toastMsg}
-        </div>
-      )}
+
     </div>
   );
 }

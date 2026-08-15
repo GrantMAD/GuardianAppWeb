@@ -5,11 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useFamilyStore } from '@/store/familyStore';
 import { updateChild, uploadChildAvatar, generatePairingCode } from '@/lib/child-service';
+import { useToast } from '@/hooks/useToast';
 
 export default function ChildDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { family, children, setChildren } = useFamilyStore();
+  const { toast } = useToast();
   const child = children.find((c) => c.id === id);
 
   const [name, setName] = useState(child?.name ?? '');
@@ -31,7 +33,7 @@ export default function ChildDetailPage() {
     try {
       const updated = await updateChild(child.id, { name: name.trim() });
       setChildren(children.map((c) => c.id === child.id ? updated : c));
-    } catch (err) { console.error(err); }
+    } catch (err) { toast.error('Failed to save name'); }
     finally { setSaving(false); }
   };
 
@@ -42,7 +44,7 @@ export default function ChildDetailPage() {
       const updated = await uploadChildAvatar(child.id, file);
       setChildren(children.map((c) => c.id === child.id ? updated : c));
     } catch (err) {
-      console.error('Failed to upload avatar:', err);
+      toast.error('Failed to upload avatar');
     }
   };
 
@@ -51,7 +53,7 @@ export default function ChildDetailPage() {
     try {
       const code = await generatePairingCode(family.id, child.id);
       setPairingCode(code);
-    } catch (err) { console.error(err); }
+    } catch (err) { toast.error('Failed to generate pairing code'); }
     finally { setGenerating(false); }
   };
 

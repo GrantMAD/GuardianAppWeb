@@ -9,12 +9,14 @@ import { getRules, createRule, deleteRule } from '@/lib/rule-service';
 import { logParentAction } from '@/lib/parent-service';
 import type { InstalledApp, Rule } from '@/types';
 import { formatMinutes } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 
 export default function AppDetailPage() {
   const { appId } = useParams<{ appId: string }>();
   const router = useRouter();
   const { selectedChildId, family } = useFamilyStore();
+  const { toast } = useToast();
 
   const [appInfo, setAppInfo] = useState<InstalledApp | null>(null);
   const [rules, setRules] = useState<Rule[]>([]);
@@ -48,7 +50,7 @@ export default function AppDetailPage() {
           return { label: d.label, minutes: log?.usage_minutes ?? 0 };
         }));
       } catch (err) {
-        console.error(err);
+        toast.error('Failed to load app details');
       } finally {
         setLoading(false);
       }
@@ -79,7 +81,7 @@ export default function AppDetailPage() {
         }
         setRules((prev) => [...prev, newRule]);
       }
-    } catch (err) { console.error(err); }
+    } catch (err) { toast.error('Failed to update block rule'); }
     finally { setToggling(false); }
   };
 

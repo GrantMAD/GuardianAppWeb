@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFamilyStore } from '@/store/familyStore';
 import { getFamily, getChildren } from '@/lib/child-service';
@@ -16,6 +16,7 @@ export function useFamilyBootstrap() {
   const { family, setFamily, children, setChildren, setSelectedChildId, selectedChildId } =
     useFamilyStore();
   const bootstrapped = useRef(false);
+  const [bootstrapError, setBootstrapError] = useState(false);
 
   useEffect(() => {
     if (bootstrapped.current) return;
@@ -58,10 +59,11 @@ export function useFamilyBootstrap() {
         }
       } catch (err) {
         console.error('Family bootstrap failed:', err);
+        setBootstrapError(true);
       }
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { family, children };
+  return { family, children, bootstrapError };
 }

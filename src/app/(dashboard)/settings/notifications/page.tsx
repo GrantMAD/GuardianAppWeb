@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useFamilyStore } from '@/store/familyStore';
 import { getNotificationPreferences, updateNotificationPreferences } from '@/lib/parent-service';
+import { useToast } from '@/hooks/useToast';
 
 interface NotifSetting {
   key: keyof Omit<import('@/types').NotificationPreference, 'id' | 'family_id' | 'created_at' | 'updated_at'>;
@@ -20,6 +21,7 @@ const SETTING_DEFS: NotifSetting[] = [
 
 export default function NotificationSettingsPage() {
   const { family } = useFamilyStore();
+  const { toast } = useToast();
   const [preferences, setPreferences] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export default function NotificationSettingsPage() {
           setPreferences(defaults);
         }
       })
-      .catch(console.error)
+      .catch(() => toast.error('Failed to load notification preferences'))
       .finally(() => setLoading(false));
   }, [family]);
 
@@ -53,10 +55,9 @@ export default function NotificationSettingsPage() {
     try {
       await updateNotificationPreferences(family.id, { [key]: newValue });
     } catch (err) {
-      console.error(err);
       // Revert on error
       setPreferences(prev => ({ ...prev, [key]: !newValue }));
-      alert('Failed to save preference');
+      toast.error('Failed to save preference');
     } finally {
       setSaving(null);
     }

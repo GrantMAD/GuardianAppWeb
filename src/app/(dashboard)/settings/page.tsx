@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { useFamilyStore } from '@/store/familyStore';
 import { getCurrentUser } from '@/lib/auth-service';
 import { ActivityLogCard } from '@/components/family/ActivityLogCard';
+import { useToast } from '@/hooks/useToast';
 
 export default function SettingsPage() {
   const router = useRouter();
   const { family, children } = useFamilyStore();
+  const { toast } = useToast();
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,8 +31,8 @@ export default function SettingsPage() {
     try {
       await updateFamilyTheme(family.id, newTheme);
     } catch (err) {
-      console.error('Failed to update theme', err);
       useFamilyStore.getState().setFamily({ ...family });
+      toast.error('Failed to update theme');
     }
   };
 

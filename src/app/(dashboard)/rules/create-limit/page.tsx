@@ -8,6 +8,7 @@ import { createTimeLimitRule, logParentAction } from '@/lib/parent-service';
 import type { InstalledApp } from '@/types';
 import Link from 'next/link';
 import { formatMinutes } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 const CATEGORIES = [
   { value: 'social', label: 'Social Media' },
@@ -25,6 +26,7 @@ export default function CreateLimitPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { children, selectedChildId, setSelectedChildId, family } = useFamilyStore();
+  const { toast } = useToast();
   
   const [apps, setApps] = useState<InstalledApp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,8 +66,7 @@ export default function CreateLimitPage() {
       }
       router.push('/rules');
     } catch (err) {
-      console.error(err);
-      alert('Failed to save time limit');
+      toast.error('Failed to save time limit');
     } finally {
       setSaving(false);
     }

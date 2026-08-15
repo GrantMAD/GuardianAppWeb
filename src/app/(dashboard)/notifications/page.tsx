@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useFamilyStore } from '@/store/familyStore';
 import { getNotifications, markNotificationsRead } from '@/lib/notification-service';
 import type { NotificationLog } from '@/types';
+import { useToast } from '@/hooks/useToast';
 
 const TYPE_ICONS: Record<string, string> = {
   request_received: '💬',
@@ -25,6 +26,7 @@ function timeAgo(dateStr: string) {
 
 export default function NotificationsPage() {
   const { family } = useFamilyStore();
+  const { toast } = useToast();
   const [notifications, setNotifications] = useState<NotificationLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -38,7 +40,7 @@ export default function NotificationsPage() {
       const unread = data.filter((n) => !n.is_read).map((n) => n.id);
       if (unread.length > 0) markNotificationsRead(unread);
     } catch (err) {
-      console.error(err);
+      toast.error('Failed to load notifications');
     } finally {
       setLoading(false);
       setRefreshing(false);

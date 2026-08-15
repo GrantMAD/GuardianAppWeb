@@ -19,10 +19,7 @@ export async function getPendingRequests(
     .eq('status', 'pending')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching pending requests:', error);
-    return [];
-  }
+  if (error) throw error;
   return (data ?? []) as unknown as PermissionRequest[];
 }
 
@@ -42,10 +39,7 @@ export async function updateRequestStatus(
     })
     .eq('id', requestId);
 
-  if (error) {
-    console.error('Error updating request:', error);
-    return false;
-  }
+  if (error) throw error;
   return true;
 }
 

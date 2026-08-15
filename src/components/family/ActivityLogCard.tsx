@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useFamilyStore } from '@/store/familyStore';
 import { getParentActivityLogs } from '@/lib/parent-service';
+import { useToast } from '@/hooks/useToast';
 import type { AuditLogEntry } from '@/types';
 
 export function ActivityLogCard() {
   const { family } = useFamilyStore();
+  const { toast } = useToast();
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,7 +17,7 @@ export function ActivityLogCard() {
     setLoading(true);
     getParentActivityLogs(family.id)
       .then(setLogs)
-      .catch(console.error)
+      .catch(() => toast.error('Failed to load activity log'))
       .finally(() => setLoading(false));
   }, [family]);
 

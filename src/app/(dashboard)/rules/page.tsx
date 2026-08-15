@@ -9,6 +9,7 @@ import { logParentAction } from '@/lib/parent-service';
 import type { Rule, Schedule, InstalledApp } from '@/types';
 import Link from 'next/link';
 import { formatMinutes } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -16,6 +17,7 @@ const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function RulesPage() {
   const { selectedChildId, children, family } = useFamilyStore();
   const selectedChild = children.find((c) => c.id === selectedChildId);
+  const { toast } = useToast();
 
   const [rules, setRules] = useState<Rule[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -39,7 +41,7 @@ export default function RulesPage() {
       ]);
       setRules(r);
       setSchedules(s);
-    } catch (err) { console.error(err); }
+    } catch (err) { toast.error('Failed to load rules'); }
     finally { setLoading(false); }
   };
 
@@ -77,7 +79,7 @@ export default function RulesPage() {
       setScheduleName('');
       setScheduleDays([0, 1, 2, 3, 4, 5, 6]);
       await load();
-    } catch (err) { console.error(err); }
+    } catch (err) { toast.error('Failed to save schedule'); }
     finally { setSavingSchedule(false); }
   };
 

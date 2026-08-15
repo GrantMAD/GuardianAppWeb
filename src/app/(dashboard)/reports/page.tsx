@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useFamilyStore } from '@/store/familyStore';
 import { getWeeklyUsage } from '@/lib/usage-service';
 import { formatMinutes, CATEGORY_COLORS } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 
 type DayData = { date: string; label: string; total: number; logs: any[] };
@@ -11,6 +12,7 @@ type DayData = { date: string; label: string; total: number; logs: any[] };
 export default function ReportsPage() {
   const { selectedChildId, children } = useFamilyStore();
   const selectedChild = children.find((c) => c.id === selectedChildId);
+  const { toast } = useToast();
 
   const [weekData, setWeekData] = useState<DayData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,7 @@ export default function ReportsPage() {
     setLoading(true);
     getWeeklyUsage(selectedChildId, daysRange)
       .then(setWeekData)
-      .catch(console.error)
+      .catch(() => toast.error('Failed to load reports'))
       .finally(() => setLoading(false));
   }, [selectedChildId, daysRange]);
 

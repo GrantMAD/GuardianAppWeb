@@ -7,6 +7,7 @@ import { getInstalledApps } from '@/lib/usage-service';
 import { createBlockRule, logParentAction } from '@/lib/parent-service';
 import type { InstalledApp } from '@/types';
 import Link from 'next/link';
+import { useToast } from '@/hooks/useToast';
 
 const CATEGORIES = [
   { value: 'social', label: 'Social Media' },
@@ -23,6 +24,7 @@ export default function CreateBlockPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { children, selectedChildId, setSelectedChildId, family } = useFamilyStore();
+  const { toast } = useToast();
   
   const [apps, setApps] = useState<InstalledApp[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,8 +62,7 @@ export default function CreateBlockPage() {
       }
       router.push('/rules');
     } catch (err) {
-      console.error(err);
-      alert('Failed to save block rule');
+      toast.error('Failed to save block rule');
     } finally {
       setSaving(false);
     }
