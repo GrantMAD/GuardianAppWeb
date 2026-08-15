@@ -7,6 +7,7 @@ import { getInstalledApps } from '@/lib/usage-service';
 import { createTimeLimitRule, logParentAction } from '@/lib/parent-service';
 import type { InstalledApp } from '@/types';
 import Link from 'next/link';
+import { formatMinutes } from '@/lib/utils';
 
 const CATEGORIES = [
   { value: 'social', label: 'Social Media' },
@@ -19,12 +20,6 @@ const CATEGORIES = [
   { value: 'other', label: 'Other' },
 ];
 
-function formatMinutes(mins: number) {
-  if (mins < 60) return `${mins}m`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
 
 export default function CreateLimitPage() {
   const router = useRouter();

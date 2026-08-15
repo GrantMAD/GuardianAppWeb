@@ -8,13 +8,8 @@ import { getDailyUsage, getWeeklyUsage, getInstalledApps } from '@/lib/usage-ser
 import { getRules, createRule, deleteRule } from '@/lib/rule-service';
 import { logParentAction } from '@/lib/parent-service';
 import type { InstalledApp, Rule } from '@/types';
+import { formatMinutes } from '@/lib/utils';
 
-function formatMinutes(mins: number) {
-  if (mins < 60) return `${mins}m`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
 
 export default function AppDetailPage() {
   const { appId } = useParams<{ appId: string }>();

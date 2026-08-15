@@ -8,22 +8,9 @@ import { getPendingRequests, updateRequestStatus } from '@/lib/notification-serv
 import { createSchedule } from '@/lib/schedule-service';
 import { supabase } from '@/lib/supabase';
 import type { UsageLog, PermissionRequest } from '@/types';
+import { formatMinutes, CATEGORY_COLORS } from '@/lib/utils';
 
-function formatMinutes(mins: number) {
-  if (mins < 60) return `${mins}m`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
 
-const CATEGORY_COLORS: Record<string, string> = {
-  social:        '#7C6AF5',
-  games:         '#F5A623',
-  entertainment: '#E91E8C',
-  education:     '#4CAF82',
-  productivity:  '#2196F3',
-  other:         '#9E9E9E',
-};
 
 export default function DashboardPage() {
   const { family, children, selectedChildId } = useFamilyStore();

@@ -8,13 +8,8 @@ import { getInstalledApps } from '@/lib/usage-service';
 import { logParentAction } from '@/lib/parent-service';
 import type { Rule, Schedule, InstalledApp } from '@/types';
 import Link from 'next/link';
+import { formatMinutes } from '@/lib/utils';
 
-function formatMinutes(mins: number) {
-  if (mins < 60) return `${mins}m`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

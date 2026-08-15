@@ -6,6 +6,7 @@ import { useFamilyStore } from '@/store/familyStore';
 import { getInstalledApps } from '@/lib/usage-service';
 import { getRules } from '@/lib/rule-service';
 import type { InstalledApp, Rule } from '@/types';
+import { CATEGORY_COLORS } from '@/lib/utils';
 
 const CATEGORIES = [
   { value: 'all', label: 'All' },
@@ -17,10 +18,6 @@ const CATEGORIES = [
   { value: 'other', label: '📦 Other' },
 ];
 
-const CATEGORY_COLORS: Record<string, string> = {
-  social: '#7C6AF5', games: '#F5A623', entertainment: '#E91E8C',
-  education: '#4CAF82', productivity: '#2196F3', other: '#9E9E9E',
-};
 
 type RuleStatus = 'blocked' | 'limited' | 'none';
 
