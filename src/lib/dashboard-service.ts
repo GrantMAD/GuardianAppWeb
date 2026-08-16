@@ -52,16 +52,19 @@ export async function createScheduleEntry(payload: {
 
 export async function getDashboardData() {
   if (!isSupabaseConfigured) {
-    return {
-      children: childProfiles,
-      usageSummary,
-      topApps,
-      rules,
-      weeklyUsage,
-      activityLog,
-      pairingCode,
-      requests: [],
-    };
+    if (process.env.NODE_ENV === 'development') {
+      return {
+        children: childProfiles,
+        usageSummary,
+        topApps,
+        rules,
+        weeklyUsage,
+        activityLog,
+        pairingCode,
+        requests: [],
+      };
+    }
+    return { children: [], usageSummary: [], topApps: [], rules: [], weeklyUsage: [], activityLog: [], pairingCode: '', requests: [] };
   }
 
   try {
@@ -113,15 +116,18 @@ export async function getDashboardData() {
       requests,
     };
   } catch {
-    return {
-      children: childProfiles,
-      usageSummary,
-      topApps,
-      rules,
-      weeklyUsage,
-      activityLog,
-      pairingCode,
-      requests: [],
-    };
+    if (process.env.NODE_ENV === 'development') {
+      return {
+        children: childProfiles,
+        usageSummary,
+        topApps,
+        rules,
+        weeklyUsage,
+        activityLog,
+        pairingCode,
+        requests: [],
+      };
+    }
+    return { children: [], usageSummary: [], topApps: [], rules: [], weeklyUsage: [], activityLog: [], pairingCode: '', requests: [] };
   }
 }
