@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useFamilyStore } from '@/store/familyStore';
 import { getInstalledApps } from '@/lib/usage-service';
 import { getRules } from '@/lib/rule-service';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 import type { InstalledApp, Rule } from '@/types';
 import { CATEGORY_COLORS } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
@@ -121,9 +122,10 @@ export default function AppsPage() {
 
           {/* App grid */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-600">
-              <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin mb-3" />
-              <p className="text-sm">Loading apps…</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-16 text-center text-text-muted">

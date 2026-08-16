@@ -10,8 +10,7 @@ import { supabase } from '@/lib/supabase';
 import type { UsageLog, PermissionRequest } from '@/types';
 import { formatMinutes, CATEGORY_COLORS } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
-
-
+import { Skeleton, SkeletonText } from '@/components/ui/Skeleton';
 
 export default function DashboardPage() {
   const { family, children, selectedChildId } = useFamilyStore();
@@ -132,14 +131,14 @@ export default function DashboardPage() {
   const usageSummary = [
     {
       label: 'Screen time today',
-      value: loading ? '—' : formatMinutes(totalMins ?? 0),
+      value: loading ? <Skeleton className="h-9 w-32" /> : formatMinutes(totalMins ?? 0),
       detail: selectedChild?.name ?? 'No child selected',
       icon: '⏱️',
       color: 'text-accent',
     },
     {
       label: 'Apps used today',
-      value: loading ? '—' : String(usageData.length),
+      value: loading ? <Skeleton className="h-9 w-12" /> : String(usageData.length),
       detail: 'applications',
       icon: '📱',
       color: 'text-violet-400',
@@ -187,7 +186,7 @@ export default function DashboardPage() {
                   <span className="text-xl">{item.icon}</span>
                   <p className="text-xs text-text-muted uppercase tracking-wider">{item.label}</p>
                 </div>
-                <p className={`text-3xl font-bold ${item.color}`}>{item.value}</p>
+                <div className={`text-3xl font-bold ${item.color}`}>{item.value}</div>
                 <p className="mt-1 text-xs text-text-muted">{item.detail}</p>
               </div>
             ))}
@@ -251,13 +250,20 @@ export default function DashboardPage() {
               <h2 className="text-base font-semibold text-text-primary">Weekly Screen Time</h2>
               <p className="text-xs text-text-muted mt-0.5 mb-5">Last 7 days for {selectedChild?.name}</p>
               {loading ? (
-                <div className="h-32 flex items-center justify-center text-slate-600 text-sm">Loading chart…</div>
+                <div className="flex items-end gap-2 h-32">
+                  {[40, 70, 50, 90, 60, 100, 80].map((h, i) => (
+                    <div key={i} className="flex flex-1 flex-col items-center gap-2">
+                      <Skeleton className="w-full rounded-t-lg" style={{ height: `${h}px` }} />
+                      <Skeleton className="h-3 w-8" />
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="flex items-end gap-2 h-32">
                   {weeklyData.map((entry) => (
                     <div key={entry.day} className="flex flex-1 flex-col items-center gap-2">
                       <div
-                        className="w-full rounded-t-lg bg-gradient-to-t from-accent to-accent transition-all"
+                        className="w-full rounded-t-lg bg-gradient-to-t from-violet-500 to-cyan-400 transition-all"
                         style={{ height: `${Math.max(4, (entry.minutes / maxWeekly) * 112)}px` }}
                         title={`${entry.day}: ${formatMinutes(entry.minutes)}`}
                       />
@@ -277,7 +283,18 @@ export default function DashboardPage() {
                 </Link>
               </div>
               {loading ? (
-                <div className="text-center text-slate-600 text-sm py-6">Loading…</div>
+                <ul className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <li key={i} className="flex items-center gap-3 rounded-xl bg-bg-primary/50 p-3">
+                      <Skeleton className="h-10 w-10 rounded-lg" />
+                      <div className="flex-1">
+                        <Skeleton className="h-4 w-24 mb-2" />
+                        <Skeleton className="h-3 w-16" />
+                      </div>
+                      <Skeleton className="h-4 w-12" />
+                    </li>
+                  ))}
+                </ul>
               ) : topApps.length === 0 ? (
                 <p className="text-center text-slate-600 text-sm py-6">No usage data yet</p>
               ) : (

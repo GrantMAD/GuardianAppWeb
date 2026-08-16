@@ -9,6 +9,7 @@ import { logParentAction } from '@/lib/parent-service';
 import type { Rule, Schedule, InstalledApp } from '@/types';
 import Link from 'next/link';
 import { formatMinutes } from '@/lib/utils';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useToast } from '@/hooks/useToast';
 
 
@@ -125,9 +126,12 @@ export default function RulesPage() {
           <p className="text-text-muted text-sm mt-1">Select a child from the sidebar to manage their rules.</p>
         </div>
       ) : loading ? (
-        <div className="flex flex-col items-center justify-center py-24 text-slate-600">
-          <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin mb-3" />
-          <p className="text-sm">Loading rules…</p>
+        <div className="space-y-6 mt-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
         </div>
       ) : (
         <>

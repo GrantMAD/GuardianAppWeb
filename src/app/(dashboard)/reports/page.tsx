@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useFamilyStore } from '@/store/familyStore';
 import { getWeeklyUsage } from '@/lib/usage-service';
 import { formatMinutes, CATEGORY_COLORS } from '@/lib/utils';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useToast } from '@/hooks/useToast';
 
 
@@ -95,9 +96,8 @@ export default function ReportsPage() {
           <p className="text-text-muted text-sm mt-1">Select a child from the sidebar to view their reports.</p>
         </div>
       ) : loading ? (
-        <div className="flex flex-col items-center justify-center py-24 text-slate-600">
-          <div className="w-8 h-8 border-2 border-border border-t-accent rounded-full animate-spin mb-3" />
-          <p className="text-sm">Loading reports…</p>
+        <div className="space-y-6 mt-6">
+          <SkeletonCard className="h-64" />
         </div>
       ) : (
         <>
@@ -126,7 +126,7 @@ export default function ReportsPage() {
                   <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
                     <span className="text-[10px] text-text-muted">{d.total > 0 ? formatMinutes(d.total) : ''}</span>
                     <div
-                      className="w-full rounded-t-lg bg-gradient-to-t from-accent to-accent transition-all cursor-pointer hover:brightness-110"
+                      className="w-full rounded-t-lg bg-gradient-to-t from-violet-500 to-cyan-400 transition-all cursor-pointer hover:brightness-110"
                       style={{ height: `${Math.max(4, (d.total / maxWeek) * 104)}px` }}
                       onClick={() => toggleDate(d.date)}
                       title={`${d.label}: ${formatMinutes(d.total)}`}
