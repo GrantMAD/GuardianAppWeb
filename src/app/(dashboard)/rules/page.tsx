@@ -221,7 +221,7 @@ export default function RulesPage() {
                   <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-border bg-bg-card px-4 py-3">
                     <div className="w-10 h-10 rounded-xl bg-bg-elevated border border-border flex items-center justify-center text-sm font-bold text-violet-400 flex-shrink-0">
                       {r.installed_apps?.icon_url
-                        ? <img src={r.installed_apps.icon_url} alt={r.installed_apps.app_name} className="w-7 h-7 rounded-lg object-contain" />
+                        ? <img src={r.installed_apps.icon_url} alt={r.installed_apps.app_name} className="w-7 h-7 rounded-lg object-contain" loading="lazy" />
                         : r.installed_apps?.app_name?.charAt(0) ?? '⏱'
                       }
                     </div>
@@ -252,7 +252,7 @@ export default function RulesPage() {
                   <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/5 px-4 py-3">
                     <div className="w-10 h-10 rounded-xl bg-bg-elevated border border-border flex items-center justify-center text-sm font-bold text-red-400 flex-shrink-0">
                       {r.installed_apps?.icon_url
-                        ? <img src={r.installed_apps.icon_url} alt={r.installed_apps.app_name} className="w-7 h-7 rounded-lg object-contain" />
+                        ? <img src={r.installed_apps.icon_url} alt={r.installed_apps.app_name} className="w-7 h-7 rounded-lg object-contain" loading="lazy" />
                         : r.installed_apps?.app_name?.charAt(0) ?? '🔒'
                       }
                     </div>

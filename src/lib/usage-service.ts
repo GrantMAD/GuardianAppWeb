@@ -44,18 +44,30 @@ export async function getWeeklyUsage(
 
   const results: { date: string; label: string; total: number; logs: UsageLog[] }[] = [];
 
+  const endD = new Date();
+  const startD = new Date();
+  startD.setDate(endD.getDate() - (days - 1));
+  const startDate = startD.toISOString().slice(0, 10);
+  const endDate = endD.toISOString().slice(0, 10);
+
+  const { data: summaries, error } = await supabase
+    .from('v_daily_screen_time')
+    .select('date, total_minutes')
+    .eq('child_id', childId)
+    .gte('date', startDate)
+    .lte('date', endDate);
+    
+  if (error) throw error;
+
+  const summaryMap = new Map(summaries?.map(s => [s.date, s.total_minutes]) || []);
+
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const date = d.toISOString().slice(0, 10);
     const label = i === 0 ? 'Today' : d.toLocaleDateString('en', { weekday: 'short' });
 
-    const [usage, summary] = await Promise.all([
-      getDailyUsage(childId, date),
-      getDailyScreenTimeSummary(childId, date),
-    ]);
-
-    results.push({ date, label, total: summary?.total_minutes ?? 0, logs: usage });
+    results.push({ date, label, total: summaryMap.get(date) ?? 0, logs: [] });
   }
 
   return results;

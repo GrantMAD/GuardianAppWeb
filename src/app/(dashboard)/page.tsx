@@ -36,24 +36,17 @@ export default function DashboardPage() {
     setLoading(true);
     (async () => {
       try {
-        const [usage, summary] = await Promise.all([
+        const [usage, summary, weeklyRes] = await Promise.all([
           getDailyUsage(selectedChildId, today),
           getDailyScreenTimeSummary(selectedChildId, today),
+          import('@/lib/usage-service').then(m => m.getWeeklyUsage(selectedChildId, 7))
         ]);
         if (cancelled) return;
         setUsageData(usage);
         setTotalMins(summary?.total_minutes ?? 0);
 
         // Build last 7 days chart
-        const days: { day: string; minutes: number }[] = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date();
-          d.setDate(d.getDate() - i);
-          const label = i === 0 ? 'Today' : d.toLocaleDateString('en', { weekday: 'short' });
-          const sum = await getDailyScreenTimeSummary(selectedChildId, d.toISOString().slice(0, 10));
-          days.push({ day: label, minutes: sum?.total_minutes ?? 0 });
-        }
-        if (!cancelled) setWeeklyData(days);
+        if (!cancelled) setWeeklyData(weeklyRes.map(w => ({ day: w.label, minutes: w.total })));
       } catch (err) {
         toast.error('Failed to load dashboard', 'Pull down to retry');
       } finally {
@@ -311,7 +304,7 @@ export default function DashboardPage() {
                             style={{ backgroundColor: color + '22' }}
                           >
                             {log.installed_apps?.icon_url ? (
-                              <img src={log.installed_apps.icon_url} alt={name} className="w-full h-full object-cover" />
+                              <img src={log.installed_apps.icon_url} alt={name} className="w-full h-full object-cover" loading="lazy" />
                             ) : (
                               <span className="text-[10px] font-bold" style={{ color }}>{name.charAt(0)}</span>
                             )}

@@ -119,7 +119,7 @@ export default function AppDetailPage() {
       <div className="rounded-2xl border border-border bg-bg-card p-5 flex items-center gap-4">
         <div className="w-16 h-16 rounded-2xl bg-bg-elevated border border-border flex items-center justify-center text-2xl font-bold text-text-primary overflow-hidden flex-shrink-0">
           {appInfo?.icon_url
-            ? <img src={appInfo.icon_url} alt={appInfo.app_name} className="w-12 h-12 rounded-xl object-contain" />
+            ? <img src={appInfo.icon_url} alt={appInfo.app_name} className="w-12 h-12 rounded-xl object-contain" loading="lazy" />
             : appInfo?.app_name?.charAt(0) ?? '?'
           }
         </div>

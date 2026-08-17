@@ -69,7 +69,7 @@ export default function ChildDetailPage() {
           <div className="relative group mb-4">
             <div className="w-24 h-24 rounded-full bg-bg-elevated border-4 border-slate-900 shadow-xl flex items-center justify-center text-3xl font-bold text-text-muted overflow-hidden">
               {child.avatar_url
-                ? <img src={child.avatar_url} alt={child.name} className="w-full h-full object-cover" />
+                ? <img src={child.avatar_url} alt={child.name} className="w-full h-full object-cover" loading="lazy" />
                 : child.name.charAt(0).toUpperCase()}
             </div>
             <button

@@ -147,7 +147,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                         ${isSelected ? 'bg-accent/30 text-accent' : 'bg-bg-elevated text-text-primary'}
                       `}>
                         {child.avatar_url
-                          ? <img src={child.avatar_url} alt={child.name} className="w-full h-full rounded-full object-cover" />
+                          ? <img src={child.avatar_url} alt={child.name} className="w-full h-full rounded-full object-cover" loading="lazy" />
                           : child.name.charAt(0).toUpperCase()
                         }
                       </div>

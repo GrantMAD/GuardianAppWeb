@@ -155,7 +155,7 @@ export default function AppsPage() {
                       style={{ backgroundColor: color + '33', border: `1px solid ${color}55` }}
                     >
                       {app.icon_url
-                        ? <img src={app.icon_url} alt={app.app_name} className="w-9 h-9 rounded-lg object-contain" />
+                        ? <img src={app.icon_url} alt={app.app_name} className="w-9 h-9 rounded-lg object-contain" loading="lazy" />
                         : app.app_name.charAt(0).toUpperCase()
                       }
                     </div>

@@ -90,7 +90,7 @@ export default function SettingsPage() {
               >
                 <div className="w-10 h-10 rounded-full bg-bg-elevated flex items-center justify-center text-sm font-bold text-text-primary flex-shrink-0 overflow-hidden">
                   {child.avatar_url
-                    ? <img src={child.avatar_url} alt={child.name} className="w-full h-full object-cover" />
+                    ? <img src={child.avatar_url} alt={child.name} className="w-full h-full object-cover" loading="lazy" />
                     : child.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

@@ -147,7 +147,7 @@ export default function ReportsPage() {
                   <div key={app.name} className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: app.color + '22' }}>
                       {app.icon_url ? (
-                        <img src={app.icon_url} alt={app.name} className="w-full h-full object-cover" />
+                        <img src={app.icon_url} alt={app.name} className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         <span className="text-[10px] font-bold" style={{ color: app.color }}>{app.name.charAt(0)}</span>
                       )}
@@ -203,7 +203,7 @@ export default function ReportsPage() {
                                 <div key={u.id} className="flex items-center gap-2">
                                   <div className="w-5 h-5 rounded flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: color + '22' }}>
                                     {u.installed_apps?.icon_url ? (
-                                      <img src={u.installed_apps.icon_url} alt={name} className="w-full h-full object-cover" />
+                                      <img src={u.installed_apps.icon_url} alt={name} className="w-full h-full object-cover" loading="lazy" />
                                     ) : (
                                       <span className="text-[9px] font-bold" style={{ color }}>{name.charAt(0)}</span>
                                     )}
