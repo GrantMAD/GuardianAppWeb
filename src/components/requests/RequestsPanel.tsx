@@ -35,7 +35,9 @@ export function RequestsPanel({ requests }: RequestsPanelProps) {
     try {
       await updatePermissionRequestStatus(requestId, nextStatus);
       if (family) {
-        await logParentAction(family.id, 'REQUEST_' + nextStatus.toUpperCase(), `Permission request ${nextStatus}`);
+        const req = visibleRequests.find(r => r.id === requestId);
+        const reqDetails = req ? ` for ${req.child}: ${req.message}` : '';
+        await logParentAction(family.id, 'REQUEST_' + nextStatus.toUpperCase(), `Permission request ${nextStatus}${reqDetails}`);
       }
       setVisibleRequests((current) => current.filter((request) => request.id !== requestId));
       router.refresh();

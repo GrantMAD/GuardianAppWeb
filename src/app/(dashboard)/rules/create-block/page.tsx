@@ -54,10 +54,11 @@ export default function CreateBlockPage() {
         category: targetType === 'category' ? categoryId : undefined,
       });
       if (family) {
+        const targetName = targetType === 'app' ? apps.find(a => a.id === appId)?.app_name || 'an app' : categoryId || 'a category';
         await logParentAction(
           family.id,
           'RULE_CREATED',
-          `Created a block rule`
+          `Created a block rule for ${targetName}`
         );
       }
       router.push('/rules');

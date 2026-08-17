@@ -58,10 +58,11 @@ export default function CreateLimitPage() {
         daily_limit_minutes: limitMinutes,
       });
       if (family) {
+        const targetName = targetType === 'app' ? apps.find(a => a.id === appId)?.app_name || 'an app' : categoryId || 'a category';
         await logParentAction(
           family.id,
           'RULE_CREATED',
-          `Created a time limit rule of ${limitMinutes} minutes`
+          `Created a time limit rule of ${limitMinutes} minutes for ${targetName}`
         );
       }
       router.push('/rules');

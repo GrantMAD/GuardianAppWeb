@@ -54,9 +54,12 @@ export default function RulesPage() {
   const blockRules = rules.filter((r) => r.rule_type === 'BLOCK');
 
   const handleDeleteRule = async (ruleId: string) => {
+    const rule = rules.find((r) => r.id === ruleId);
     await deleteRule(ruleId);
-    if (family) {
-      await logParentAction(family.id, 'RULE_REMOVED', `Removed a rule`);
+    if (family && rule) {
+      const targetName = rule.app_id ? (rule.installed_apps?.app_name || 'an app') : (rule.category || 'a category');
+      const ruleTypeName = rule.rule_type === 'BLOCK' ? 'block' : 'time limit';
+      await logParentAction(family.id, 'RULE_REMOVED', `Removed ${ruleTypeName} rule for ${targetName}`);
     }
     setRules((prev) => prev.filter((r) => r.id !== ruleId));
   };
@@ -87,17 +90,19 @@ export default function RulesPage() {
   };
 
   const handleDeleteSchedule = async (id: string) => {
+    const schedule = schedules.find((s) => s.id === id);
     await deleteSchedule(id);
-    if (family) {
-      await logParentAction(family.id, 'SCHEDULE_REMOVED', `Deleted a schedule`);
+    if (family && schedule) {
+      await logParentAction(family.id, 'SCHEDULE_REMOVED', `Deleted schedule: ${schedule.name}`);
     }
     setSchedules((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleToggleSchedule = async (id: string, current: boolean) => {
+    const schedule = schedules.find((s) => s.id === id);
     await toggleSchedule(id, !current);
-    if (family) {
-      await logParentAction(family.id, 'SCHEDULE_UPDATED', `Toggled a schedule ${!current ? 'on' : 'off'}`);
+    if (family && schedule) {
+      await logParentAction(family.id, 'SCHEDULE_UPDATED', `Turned ${!current ? 'on' : 'off'} schedule: ${schedule.name}`);
     }
     setSchedules((prev) => prev.map((s) => s.id === id ? { ...s, is_active: !current } : s));
   };
