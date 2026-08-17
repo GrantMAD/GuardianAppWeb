@@ -10,6 +10,7 @@ import { logParentAction } from '@/lib/parent-service';
 import type { InstalledApp, Rule } from '@/types';
 import { formatMinutes } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 
 export default function AppDetailPage() {
@@ -24,6 +25,7 @@ export default function AppDetailPage() {
   const [weekData, setWeekData] = useState<{ label: string; minutes: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [showDeleteLimit, setShowDeleteLimit] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -213,7 +215,7 @@ export default function AppDetailPage() {
                 Edit
               </Link>
               <button
-                onClick={handleDeleteLimit}
+                onClick={() => setShowDeleteLimit(true)}
                 className="text-xs text-red-400 hover:text-red-300 transition-colors"
               >
                 Remove
@@ -229,6 +231,14 @@ export default function AppDetailPage() {
           </Link>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteLimit}
+        title="Delete Rule"
+        message="Are you sure you want to delete this time limit?"
+        onConfirm={handleDeleteLimit}
+        onClose={() => setShowDeleteLimit(false)}
+      />
     </div>
   );
 }

@@ -51,8 +51,20 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
     checkAccess();
 
+    let subscription: any = null;
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || !session) {
+          window.localStorage.removeItem('guardian-web-auth');
+          if (isActive) router.replace('/login');
+        }
+      });
+      subscription = data.subscription;
+    }
+
     return () => {
       isActive = false;
+      if (subscription) subscription.unsubscribe();
     };
   }, [pathname, router]);
 

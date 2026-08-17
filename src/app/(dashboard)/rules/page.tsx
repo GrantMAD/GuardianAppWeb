@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { formatMinutes } from '@/lib/utils';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { useToast } from '@/hooks/useToast';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -31,6 +32,7 @@ export default function RulesPage() {
   const [scheduleEnd, setScheduleEnd] = useState('07:00');
   const [scheduleDays, setScheduleDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [savingSchedule, setSavingSchedule] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string, type: 'rule' | 'schedule' } | null>(null);
 
   const load = async () => {
     if (!selectedChildId) return;
@@ -227,7 +229,7 @@ export default function RulesPage() {
                       <p className="text-sm font-medium text-text-primary truncate">{r.installed_apps?.app_name ?? r.category ?? 'All Apps'}</p>
                       <p className="text-xs text-amber-400 font-semibold">{formatMinutes(r.daily_limit_minutes ?? 0)} / day</p>
                     </div>
-                    <button onClick={() => handleDeleteRule(r.id)}
+                    <button onClick={() => setDeleteTarget({ id: r.id, type: 'rule' })}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">
                       Remove
                     </button>
@@ -258,7 +260,7 @@ export default function RulesPage() {
                       <p className="text-sm font-medium text-text-primary truncate">{r.installed_apps?.app_name ?? r.category ?? 'All Apps'}</p>
                       <p className="text-xs text-red-400">Blocked</p>
                     </div>
-                    <button onClick={() => handleDeleteRule(r.id)}
+                    <button onClick={() => setDeleteTarget({ id: r.id, type: 'rule' })}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">
                       Remove
                     </button>
@@ -292,7 +294,7 @@ export default function RulesPage() {
                       className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${s.is_active ? 'bg-accent' : 'bg-slate-600'}`}>
                       <span className={`absolute left-0 top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${s.is_active ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                     </button>
-                    <button onClick={() => handleDeleteSchedule(s.id)}
+                    <button onClick={() => setDeleteTarget({ id: s.id, type: 'schedule' })}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">
                       Delete
                     </button>
@@ -303,6 +305,17 @@ export default function RulesPage() {
           </div>
         </>
       )}
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title={deleteTarget?.type === 'rule' ? 'Delete Rule' : 'Delete Schedule'}
+        message={`Are you sure you want to delete this ${deleteTarget?.type === 'rule' ? 'rule' : 'schedule'}?`}
+        onConfirm={() => {
+          if (deleteTarget?.type === 'rule') handleDeleteRule(deleteTarget.id);
+          else if (deleteTarget?.type === 'schedule') handleDeleteSchedule(deleteTarget.id);
+        }}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
