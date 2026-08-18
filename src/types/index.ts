@@ -140,3 +140,30 @@ export interface AuditLogEntry {
   metadata?: any;
   created_at: string;
 }
+
+// ─── Reward Tasks ─────────────────────────────────────────────────────────────
+
+export interface RewardTask {
+  id: string;
+  child_id: string;
+  title: string;
+  description: string | null;
+  reward_minutes: number;
+  status: 'pending' | 'awaiting_approval' | 'completed' | 'cancelled';
+  app_id: string | null;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  installed_apps?: {
+    app_name: string;
+    icon_url: string | null;
+  } | null;
+}
+
+export interface CreateRewardTaskPayload {
+  child_id: string;
+  title: string;
+  description?: string;
+  reward_minutes: number;
+  app_id?: string;
+}
