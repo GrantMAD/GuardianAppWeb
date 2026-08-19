@@ -20,6 +20,7 @@ export async function createTimeLimitRule(payload: CreateTimeLimitRulePayload): 
       category: payload.category,
       rule_type: 'TIME_LIMIT',
       daily_limit_minutes: payload.daily_limit_minutes,
+      weekly_limit_minutes: payload.weekly_limit_minutes ?? null,
       is_active: true,
     })
     .select()
@@ -28,6 +29,7 @@ export async function createTimeLimitRule(payload: CreateTimeLimitRulePayload): 
   if (error) throw error;
   return data as Rule;
 }
+
 
 export async function createBlockRule(payload: CreateBlockRulePayload): Promise<Rule> {
   if (!supabase) throw new Error('Supabase not configured');

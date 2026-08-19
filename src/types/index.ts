@@ -33,6 +33,7 @@ export interface Rule {
   category: string | null;
   rule_type: RuleType;
   daily_limit_minutes: number | null;
+  weekly_limit_minutes: number | null;
   is_active: boolean;
   installed_apps: { app_name: string; icon_url: string | null; package_name: string } | null;
 }
@@ -112,6 +113,7 @@ export interface CreateTimeLimitRulePayload {
   app_id?: string | null;
   category?: string | null;
   daily_limit_minutes: number;
+  weekly_limit_minutes?: number | null;
 }
 
 export interface CreateBlockRulePayload {

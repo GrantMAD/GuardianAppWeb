@@ -36,6 +36,8 @@ export default function CreateLimitPage() {
   const [appId, setAppId] = useState(searchParams.get('appId') || '');
   const [categoryId, setCategoryId] = useState('');
   const [limitMinutes, setLimitMinutes] = useState(60);
+  const [weeklyEnabled, setWeeklyEnabled] = useState(false);
+  const [weeklyLimitHours, setWeeklyLimitHours] = useState(5);
 
   useEffect(() => {
     if (!selectedChildId) return;
@@ -48,7 +50,11 @@ export default function CreateLimitPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedChildId || (targetType === 'app' && !appId) || (targetType === 'category' && !categoryId)) return;
-    
+    const weeklyLimitMinutes = weeklyEnabled ? weeklyLimitHours * 60 : null;
+    if (weeklyEnabled && weeklyLimitMinutes !== null && weeklyLimitMinutes < limitMinutes) {
+      toast.error('Weekly limit must be at least as large as the daily limit');
+      return;
+    }
     setSaving(true);
     try {
       await createTimeLimitRule({
@@ -56,13 +62,15 @@ export default function CreateLimitPage() {
         app_id: targetType === 'app' ? appId : undefined,
         category: targetType === 'category' ? categoryId : undefined,
         daily_limit_minutes: limitMinutes,
+        weekly_limit_minutes: weeklyLimitMinutes,
       });
       if (family) {
         const targetName = targetType === 'app' ? apps.find(a => a.id === appId)?.app_name || 'an app' : categoryId || 'a category';
+        const weeklyDetail = weeklyEnabled ? `, ${weeklyLimitHours}h/week` : '';
         await logParentAction(
           family.id,
           'RULE_CREATED',
-          `Created a time limit rule of ${limitMinutes} minutes for ${targetName}`
+          `Created a time limit rule of ${limitMinutes} minutes/day${weeklyDetail} for ${targetName}`
         );
       }
       router.push('/rules');
@@ -154,7 +162,7 @@ export default function CreateLimitPage() {
           </div>
         )}
 
-        {/* Limit Slider */}
+        {/* Daily Limit Slider */}
         <div>
           <label className="block text-sm font-semibold text-text-primary mb-4">Daily Limit</label>
           <div className="flex items-center gap-4 bg-bg-elevated/50 p-6 rounded-2xl border border-border/50">
@@ -171,6 +179,49 @@ export default function CreateLimitPage() {
               <span className="text-lg font-bold text-violet-400">{formatMinutes(limitMinutes)}</span>
             </div>
           </div>
+        </div>
+
+        {/* Weekly Budget */}
+        <div className="rounded-2xl border border-border bg-bg-elevated/30 p-5 space-y-4">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              id="weekly-budget-toggle"
+              type="checkbox"
+              checked={weeklyEnabled}
+              onChange={(e) => setWeeklyEnabled(e.target.checked)}
+              className="w-4 h-4 accent-indigo-400 rounded"
+            />
+            <div>
+              <span className="text-sm font-semibold text-text-primary">📅 Set weekly budget</span>
+              <p className="text-xs text-text-muted mt-0.5">Cap total usage across the rolling 7-day window</p>
+            </div>
+          </label>
+
+          {weeklyEnabled && (
+            <div className="space-y-2 pt-1">
+              <label className="block text-sm font-semibold text-text-primary">
+                Weekly limit — <span className="text-indigo-400">{weeklyLimitHours}h ({weeklyLimitHours * 60} min)</span>
+              </label>
+              <div className="flex items-center gap-4">
+                <input
+                  id="weekly-limit-slider"
+                  type="range"
+                  min={1}
+                  max={56}
+                  step={1}
+                  value={weeklyLimitHours}
+                  onChange={(e) => setWeeklyLimitHours(Number(e.target.value))}
+                  className="flex-1 accent-indigo-400"
+                />
+                <div className="w-16 text-center rounded-xl bg-indigo-500/10 py-2 border border-indigo-500/20">
+                  <span className="text-base font-bold text-indigo-400">{weeklyLimitHours}h</span>
+                </div>
+              </div>
+              {weeklyLimitHours * 60 < limitMinutes && (
+                <p className="text-xs text-amber-400">⚠️ Weekly limit should be at least as large as the daily limit.</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="pt-4 flex gap-3">

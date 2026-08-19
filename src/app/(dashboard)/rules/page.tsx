@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useFamilyStore } from '@/store/familyStore';
 import { getRules, deleteRule } from '@/lib/rule-service';
 import { getSchedules, createSchedule, deleteSchedule, toggleSchedule } from '@/lib/schedule-service';
-import { getInstalledApps } from '@/lib/usage-service';
+import { getInstalledApps, getWeeklyUsageByApp } from '@/lib/usage-service';
 import { logParentAction } from '@/lib/parent-service';
 import type { Rule, Schedule, InstalledApp } from '@/types';
 import Link from 'next/link';
@@ -23,6 +23,7 @@ export default function RulesPage() {
 
   const [rules, setRules] = useState<Rule[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [weeklyUsage, setWeeklyUsage] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   // Create schedule form state
@@ -38,12 +39,14 @@ export default function RulesPage() {
     if (!selectedChildId) return;
     setLoading(true);
     try {
-      const [r, s] = await Promise.all([
+      const [r, s, weekly] = await Promise.all([
         getRules(selectedChildId),
         getSchedules(selectedChildId),
+        getWeeklyUsageByApp(selectedChildId),
       ]);
       setRules(r);
       setSchedules(s);
+      setWeeklyUsage(weekly);
     } catch (err) { toast.error('Failed to load rules'); }
     finally { setLoading(false); }
   };
@@ -230,9 +233,19 @@ export default function RulesPage() {
                         : r.installed_apps?.app_name?.charAt(0) ?? '⏱'
                       }
                     </div>
-                    <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-text-primary truncate">{r.installed_apps?.app_name ?? r.category ?? 'All Apps'}</p>
-                      <p className="text-xs text-amber-400 font-semibold">{formatMinutes(r.daily_limit_minutes ?? 0)} / day</p>
+                      <p className="text-xs text-amber-400 font-semibold">⏱ {formatMinutes(r.daily_limit_minutes ?? 0)} / day</p>
+                      {r.weekly_limit_minutes != null && (
+                        <p className="text-xs text-indigo-400 font-medium mt-0.5">
+                          📅 {formatMinutes(r.weekly_limit_minutes)} / week
+                          {r.app_id && weeklyUsage[r.app_id] !== undefined && (
+                            <span className="ml-1.5 text-text-muted">
+                              ({formatMinutes(weeklyUsage[r.app_id])} used)
+                            </span>
+                          )}
+                        </p>
+                      )}
                     </div>
                     <button onClick={() => setDeleteTarget({ id: r.id, type: 'rule' })}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">
