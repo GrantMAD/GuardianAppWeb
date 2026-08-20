@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useFamilyStore } from '@/store/familyStore';
 import { getInstalledApps } from '@/lib/usage-service';
 import { createTimeLimitRule, logParentAction } from '@/lib/parent-service';
+import { getLocationProfiles } from '@/lib/location-profile-service';
 import type { InstalledApp } from '@/types';
+import type { LocationProfile } from '@/lib/location-profile-service';
 import Link from 'next/link';
 import { formatMinutes } from '@/lib/utils';
 import { useToast } from '@/hooks/useToast';
@@ -38,12 +40,17 @@ export default function CreateLimitPage() {
   const [limitMinutes, setLimitMinutes] = useState(60);
   const [weeklyEnabled, setWeeklyEnabled] = useState(false);
   const [weeklyLimitHours, setWeeklyLimitHours] = useState(5);
+  const [locationProfiles, setLocationProfiles] = useState<LocationProfile[]>([]);
+  const [locationProfileId, setLocationProfileId] = useState<string | undefined>();
 
   useEffect(() => {
     if (!selectedChildId) return;
     setLoading(true);
-    getInstalledApps(selectedChildId)
-      .then((a) => setApps((a ?? []) as InstalledApp[]))
+    Promise.all([
+      getInstalledApps(selectedChildId),
+      getLocationProfiles(selectedChildId),
+    ])
+      .then(([a, p]) => { setApps((a ?? []) as InstalledApp[]); setLocationProfiles(p); })
       .finally(() => setLoading(false));
   }, [selectedChildId]);
 
@@ -63,6 +70,7 @@ export default function CreateLimitPage() {
         category: targetType === 'category' ? categoryId : undefined,
         daily_limit_minutes: limitMinutes,
         weekly_limit_minutes: weeklyLimitMinutes,
+        location_profile_id: locationProfileId ?? null,
       });
       if (family) {
         const targetName = targetType === 'app' ? apps.find(a => a.id === appId)?.app_name || 'an app' : categoryId || 'a category';
@@ -223,6 +231,44 @@ export default function CreateLimitPage() {
             </div>
           )}
         </div>
+
+        {/* Location scope */}
+        {locationProfiles.length > 0 && (
+          <div>
+            <label className="block text-sm font-semibold text-text-primary mb-2">
+              📍 Apply only at location <span className="text-text-muted font-normal">(optional)</span>
+            </label>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setLocationProfileId(undefined)}
+                className={`w-full flex justify-between items-center rounded-xl border px-4 py-2.5 text-sm transition-all ${
+                  !locationProfileId
+                    ? 'bg-accent/10 border-accent/30 text-accent'
+                    : 'bg-bg-elevated border-border text-text-muted hover:text-text-primary'
+                }`}
+              >
+                <span>🌍 Everywhere (global)</span>
+                {!locationProfileId && <span>✓</span>}
+              </button>
+              {locationProfiles.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setLocationProfileId(locationProfileId === p.id ? undefined : p.id)}
+                  className={`w-full flex justify-between items-center rounded-xl border px-4 py-2.5 text-sm transition-all ${
+                    locationProfileId === p.id
+                      ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
+                      : 'bg-bg-elevated border-border text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  <span>📍 {p.name}</span>
+                  {locationProfileId === p.id && <span>✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="pt-4 flex gap-3">
           <Link href="/rules" className="flex-1 text-center rounded-xl border border-border px-4 py-3 font-semibold text-text-muted hover:text-text-primary hover:bg-bg-elevated transition-colors">

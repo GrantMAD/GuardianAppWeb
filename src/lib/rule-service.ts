@@ -20,6 +20,8 @@ export async function createRule(
   appId?: string,
   category?: string,
   dailyLimitMinutes?: number,
+  weeklyLimitMinutes?: number,
+  locationProfileId?: string,
 ): Promise<Rule> {
   if (!supabase) throw new Error('Supabase not configured');
 
@@ -34,6 +36,8 @@ export async function createRule(
       app_id: appId ?? null,
       category: category ?? null,
       daily_limit_minutes: dailyLimitMinutes ?? null,
+      weekly_limit_minutes: weeklyLimitMinutes ?? null,
+      location_profile_id: locationProfileId ?? null,
       created_by: user.id,
     })
     .select('*, installed_apps(app_name, icon_url, package_name)')

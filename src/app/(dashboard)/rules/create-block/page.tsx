@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useFamilyStore } from '@/store/familyStore';
 import { getInstalledApps } from '@/lib/usage-service';
 import { createBlockRule, logParentAction } from '@/lib/parent-service';
+import { getLocationProfiles } from '@/lib/location-profile-service';
 import type { InstalledApp } from '@/types';
+import type { LocationProfile } from '@/lib/location-profile-service';
 import Link from 'next/link';
 import { useToast } from '@/hooks/useToast';
 
@@ -33,12 +35,17 @@ export default function CreateBlockPage() {
   const [targetType, setTargetType] = useState<'app' | 'category'>('app');
   const [appId, setAppId] = useState(searchParams.get('appId') || '');
   const [categoryId, setCategoryId] = useState('');
+  const [locationProfiles, setLocationProfiles] = useState<LocationProfile[]>([]);
+  const [locationProfileId, setLocationProfileId] = useState<string | undefined>();
 
   useEffect(() => {
     if (!selectedChildId) return;
     setLoading(true);
-    getInstalledApps(selectedChildId)
-      .then((a) => setApps((a ?? []) as InstalledApp[]))
+    Promise.all([
+      getInstalledApps(selectedChildId),
+      getLocationProfiles(selectedChildId),
+    ])
+      .then(([a, p]) => { setApps((a ?? []) as InstalledApp[]); setLocationProfiles(p); })
       .finally(() => setLoading(false));
   }, [selectedChildId]);
 
@@ -52,6 +59,7 @@ export default function CreateBlockPage() {
         child_id: selectedChildId,
         app_id: targetType === 'app' ? appId : undefined,
         category: targetType === 'category' ? categoryId : undefined,
+        location_profile_id: locationProfileId ?? null,
       });
       if (family) {
         const targetName = targetType === 'app' ? apps.find(a => a.id === appId)?.app_name || 'an app' : categoryId || 'a category';
@@ -147,6 +155,44 @@ export default function CreateBlockPage() {
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* Location scope */}
+        {locationProfiles.length > 0 && (
+          <div>
+            <label className="block text-sm font-semibold text-text-primary mb-2">
+              📍 Apply only at location <span className="text-text-muted font-normal">(optional)</span>
+            </label>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setLocationProfileId(undefined)}
+                className={`w-full flex justify-between items-center rounded-xl border px-4 py-2.5 text-sm transition-all ${
+                  !locationProfileId
+                    ? 'bg-accent/10 border-accent/30 text-accent'
+                    : 'bg-bg-elevated border-border text-text-muted hover:text-text-primary'
+                }`}
+              >
+                <span>🌍 Everywhere (global)</span>
+                {!locationProfileId && <span>✓</span>}
+              </button>
+              {locationProfiles.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setLocationProfileId(locationProfileId === p.id ? undefined : p.id)}
+                  className={`w-full flex justify-between items-center rounded-xl border px-4 py-2.5 text-sm transition-all ${
+                    locationProfileId === p.id
+                      ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
+                      : 'bg-bg-elevated border-border text-text-muted hover:text-text-primary'
+                  }`}
+                >
+                  <span>📍 {p.name}</span>
+                  {locationProfileId === p.id && <span>✓</span>}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

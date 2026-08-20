@@ -34,6 +34,7 @@ export interface Rule {
   rule_type: RuleType;
   daily_limit_minutes: number | null;
   weekly_limit_minutes: number | null;
+  location_profile_id: string | null;
   is_active: boolean;
   installed_apps: { app_name: string; icon_url: string | null; package_name: string } | null;
 }
@@ -114,12 +115,14 @@ export interface CreateTimeLimitRulePayload {
   category?: string | null;
   daily_limit_minutes: number;
   weekly_limit_minutes?: number | null;
+  location_profile_id?: string | null;
 }
 
 export interface CreateBlockRulePayload {
   child_id: string;
   app_id?: string | null;
   category?: string | null;
+  location_profile_id?: string | null;
 }
 
 // ─── Notification Preferences ─────────────────────────────────────────────────

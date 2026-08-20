@@ -21,6 +21,7 @@ export async function createTimeLimitRule(payload: CreateTimeLimitRulePayload): 
       rule_type: 'TIME_LIMIT',
       daily_limit_minutes: payload.daily_limit_minutes,
       weekly_limit_minutes: payload.weekly_limit_minutes ?? null,
+      location_profile_id: payload.location_profile_id ?? null,
       is_active: true,
     })
     .select()
@@ -41,6 +42,7 @@ export async function createBlockRule(payload: CreateBlockRulePayload): Promise<
       app_id: payload.app_id,
       category: payload.category,
       rule_type: 'BLOCK',
+      location_profile_id: payload.location_profile_id ?? null,
       is_active: true,
     })
     .select()

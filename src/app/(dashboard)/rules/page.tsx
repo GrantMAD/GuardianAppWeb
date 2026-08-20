@@ -6,7 +6,9 @@ import { getRules, deleteRule } from '@/lib/rule-service';
 import { getSchedules, createSchedule, deleteSchedule, toggleSchedule } from '@/lib/schedule-service';
 import { getInstalledApps, getWeeklyUsageByApp } from '@/lib/usage-service';
 import { logParentAction } from '@/lib/parent-service';
+import { getLocationProfiles } from '@/lib/location-profile-service';
 import type { Rule, Schedule, InstalledApp } from '@/types';
+import type { LocationProfile } from '@/lib/location-profile-service';
 import Link from 'next/link';
 import { formatMinutes } from '@/lib/utils';
 import { SkeletonCard } from '@/components/ui/Skeleton';
@@ -24,6 +26,7 @@ export default function RulesPage() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [weeklyUsage, setWeeklyUsage] = useState<Record<string, number>>({});
+  const [locationProfiles, setLocationProfiles] = useState<LocationProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Create schedule form state
@@ -39,14 +42,16 @@ export default function RulesPage() {
     if (!selectedChildId) return;
     setLoading(true);
     try {
-      const [r, s, weekly] = await Promise.all([
+      const [r, s, weekly, profiles] = await Promise.all([
         getRules(selectedChildId),
         getSchedules(selectedChildId),
         getWeeklyUsageByApp(selectedChildId),
+        getLocationProfiles(selectedChildId),
       ]);
       setRules(r);
       setSchedules(s);
       setWeeklyUsage(weekly);
+      setLocationProfiles(profiles);
     } catch (err) { toast.error('Failed to load rules'); }
     finally { setLoading(false); }
   };
@@ -165,6 +170,15 @@ export default function RulesPage() {
             >
               🕐 Add Schedule
             </button>
+            <Link
+              href="/locations"
+              className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/20 transition-all"
+            >
+              📍 Manage Locations
+              {locationProfiles.length > 0 && (
+                <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-xs">{locationProfiles.length}</span>
+              )}
+            </Link>
           </div>
 
           {/* Schedule form */}
@@ -246,6 +260,11 @@ export default function RulesPage() {
                           )}
                         </p>
                       )}
+                      {r.location_profile_id && (
+                        <p className="text-xs text-emerald-400 font-medium mt-0.5">
+                          📍 {locationProfiles.find(p => p.id === r.location_profile_id)?.name ?? 'Location'}
+                        </p>
+                      )}
                     </div>
                     <button onClick={() => setDeleteTarget({ id: r.id, type: 'rule' })}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">
@@ -277,6 +296,11 @@ export default function RulesPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-text-primary truncate">{r.installed_apps?.app_name ?? r.category ?? 'All Apps'}</p>
                       <p className="text-xs text-red-400">Blocked</p>
+                      {r.location_profile_id && (
+                        <p className="text-xs text-emerald-400 font-medium mt-0.5">
+                          📍 {locationProfiles.find(p => p.id === r.location_profile_id)?.name ?? 'Location'}
+                        </p>
+                      )}
                     </div>
                     <button onClick={() => setDeleteTarget({ id: r.id, type: 'rule' })}
                       className="text-xs text-red-400 hover:text-red-300 transition-colors flex-shrink-0">

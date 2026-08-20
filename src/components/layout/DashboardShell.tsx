@@ -19,6 +19,7 @@ const navItems = [
   { href: '/',              label: 'Overview',      icon: '🏠' },
   { href: '/apps',          label: 'Apps',          icon: '📱' },
   { href: '/rules',         label: 'Rules',         icon: '⚙️' },
+  { href: '/locations',     label: 'Locations',     icon: '📍' },
   { href: '/reports',       label: 'Reports',       icon: '📈' },
   { href: '/rewards',       label: 'Rewards',       icon: '🎁' },
   { href: '/notifications', label: 'Notifications', icon: '🔔' },
