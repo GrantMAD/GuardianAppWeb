@@ -20,6 +20,7 @@ export interface Child {
   os_type: 'android' | 'ios' | null;
   is_active: boolean;
   last_seen_at: string | null;
+  emergency_pin_hash: string | null;
 }
 
 // ─── Rules ────────────────────────────────────────────────────────────────────

@@ -59,7 +59,7 @@ export async function addChild(familyId: string, name: string): Promise<Child> {
 
 export async function updateChild(
   childId: string,
-  updates: Partial<Pick<Child, 'name' | 'is_active'>>,
+  updates: Partial<Pick<Child, 'name' | 'is_active' | 'emergency_pin_hash'>>,
 ): Promise<Child> {
   if (!supabase) throw new Error('Supabase not configured');
 

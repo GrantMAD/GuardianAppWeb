@@ -18,6 +18,9 @@ export default function ChildDetailPage() {
   const [saving, setSaving] = useState(false);
   const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [pin, setPin] = useState('');
+  const [pinSaving, setPinSaving] = useState(false);
+  const [showPin, setShowPin] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +58,29 @@ export default function ChildDetailPage() {
       setPairingCode(code);
     } catch (err) { toast.error('Failed to generate pairing code'); }
     finally { setGenerating(false); }
+  };
+
+  const handleSetPin = async () => {
+    if (!pin || pin.length !== 4 || isNaN(Number(pin))) {
+      toast.error('PIN must be exactly 4 digits');
+      return;
+    }
+    setPinSaving(true);
+    try {
+      const msgUint8 = new TextEncoder().encode(pin);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const pinHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const updated = await updateChild(child.id, { emergency_pin_hash: pinHash });
+      setChildren(children.map((c) => c.id === child.id ? updated : c));
+      setPin('');
+      toast.success('Emergency PIN updated');
+    } catch (err) {
+      toast.error('Failed to save PIN');
+    } finally {
+      setPinSaving(false);
+    }
   };
 
   return (
@@ -157,6 +183,43 @@ export default function ChildDetailPage() {
               )}
             </div>
           )}
+        </div>
+        
+        {/* Emergency PIN */}
+        <div className="p-8 border-t border-border/60">
+          <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wider mb-1">🚨 Emergency Override PIN</h2>
+          <p className="text-xs text-text-muted mb-1">Set a 4-digit PIN that your child can use to temporarily suspend restrictions in an emergency.</p>
+          <p className="text-xs text-text-muted/80 mb-4 italic">Note: For security, your PIN is securely hashed. We cannot show it to you after it is saved. If you forget it, simply enter a new one below.</p>
+          
+          <div className="flex items-center gap-3">
+            <div className="relative flex items-center">
+              <input
+                type={showPin ? "text" : "password"}
+                maxLength={4}
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="0000"
+                className="bg-bg-elevated border border-border rounded-xl pl-4 pr-10 py-2.5 text-text-primary text-center tracking-[0.5em] w-36 focus:border-accent outline-none"
+              />
+              <button
+                onClick={() => setShowPin(!showPin)}
+                className="absolute right-3 text-lg opacity-60 hover:opacity-100"
+                title={showPin ? "Hide PIN" : "Show PIN"}
+              >
+                {showPin ? '🙈' : '👁️'}
+              </button>
+            </div>
+            <button
+              onClick={handleSetPin}
+              disabled={pinSaving || pin.length !== 4}
+              className="rounded-xl bg-accent py-2.5 px-6 text-sm font-bold text-white hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:bg-bg-elevated disabled:text-text-muted"
+            >
+              {pinSaving ? 'Saving…' : 'Save PIN'}
+            </button>
+            {child.emergency_pin_hash && (
+              <span className="text-xs font-semibold text-emerald-400">✅ Configured</span>
+            )}
+          </div>
         </div>
       </div>
     </div>
